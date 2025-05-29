@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import lombok.Builder;
 import lombok.Getter;
 
 @Entity
@@ -44,12 +45,10 @@ public class User {
     }
 
     // 생성자
+    @Builder
     public User(String email, String nickname, String password) {
         this.email = email;
         this.nickname = nickname;
         this.password = password;
-        this.createdAt = Instant.now();
-        this.isDeleted = false;
     }
-
  }
