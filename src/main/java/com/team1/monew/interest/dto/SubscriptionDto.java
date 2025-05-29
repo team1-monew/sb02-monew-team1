@@ -1,4 +1,4 @@
-package com.team1.monew.subscription.dto;
+package com.team1.monew.interest.dto;
 
 import java.time.Instant;
 import java.util.List;
