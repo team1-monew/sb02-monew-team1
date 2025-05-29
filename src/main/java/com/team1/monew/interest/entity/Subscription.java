@@ -1,6 +1,5 @@
-package com.team1.monew.subscription.entity;
+package com.team1.monew.interest.entity;
 
-import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,5 +39,4 @@ public class Subscription {
         this.interest = interest;
         this.createdAt = Instant.now();
     }
-
 }

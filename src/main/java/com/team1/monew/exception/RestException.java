@@ -3,7 +3,9 @@ package com.team1.monew.exception;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
+import lombok.Getter;
 
+@Getter
 public class RestException extends RuntimeException {
 
   private final Instant timestamp;
