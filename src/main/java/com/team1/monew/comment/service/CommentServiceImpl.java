@@ -2,7 +2,7 @@ package com.team1.monew.comment.service;
 
 import com.team1.monew.article.entity.Article;
 import com.team1.monew.article.repository.ArticleRepository;
-import com.team1.monew.comment.CommentRepository;
+import com.team1.monew.comment.repository.CommentRepository;
 import com.team1.monew.comment.dto.CommentDto;
 import com.team1.monew.comment.dto.CommentRegisterRequest;
 import com.team1.monew.comment.entity.Comment;

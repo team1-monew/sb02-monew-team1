@@ -1,6 +1,6 @@
 package com.team1.monew.comment.mapper;
 
-import com.team1.monew.comment.CommentLikeRepository;
+import com.team1.monew.comment.repository.CommentLikeRepository;
 import com.team1.monew.comment.dto.CommentDto;
 import com.team1.monew.comment.entity.Comment;
 import lombok.AllArgsConstructor;

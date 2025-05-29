@@ -1,4 +1,4 @@
-package com.team1.monew.comment;
+package com.team1.monew.comment.repository;
 
 import com.team1.monew.comment.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
