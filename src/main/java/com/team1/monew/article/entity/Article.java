@@ -4,14 +4,17 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.List;
 import java.util.ArrayList;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 
 @Entity
 @Getter
 @NoArgsConstructor
 @Table(name = "articles")
+@Builder
+@AllArgsConstructor
 public class Article {
 
     @Id
@@ -52,5 +55,17 @@ public class Article {
         this.publishDate = publishDate;
         this.summary = summary;
         this.createdAt = Instant.now();
+    }
+
+    public void markDeleted() {
+        this.isDeleted = true;
+    }
+
+    public void restore() {
+        this.isDeleted = false;
+    }
+
+    public void increaseViewCount() {
+        this.viewCount++;
     }
 }

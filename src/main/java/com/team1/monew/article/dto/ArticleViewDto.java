@@ -1,7 +1,9 @@
 package com.team1.monew.article.dto;
 
 import java.time.Instant;
+import lombok.Builder;
 
+@Builder
 public record ArticleViewDto(
     Long id,
     Long viewedBy,
