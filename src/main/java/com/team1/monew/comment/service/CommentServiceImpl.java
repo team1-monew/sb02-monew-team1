@@ -29,10 +29,10 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto register(CommentRegisterRequest request) {
 
         User user = userRepository.findById(request.userId())
-            .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND, Map.of("userId", request.userId())));
+            .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND, Map.of("userId", request.userId(), "detail", "User not found")));
 
         Article article = articleRepository.findById(request.articleId())
-            .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND, Map.of("articleId", request.articleId())));
+            .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND, Map.of("articleId", request.articleId(), "detail", "Article not found")));
 
         Comment newComment = Comment.builder()
             .content(request.content())
