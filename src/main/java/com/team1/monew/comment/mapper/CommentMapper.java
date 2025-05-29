@@ -13,7 +13,7 @@ public class CommentMapper {
     private final CommentLikeRepository commentLikeRepository;
 
     public CommentDto toDto(Comment comment, Long userId) {
-        boolean likedByMe = commentLikeRepository.existsByCommentIdAndUserId(
+        boolean likedByMe = commentLikeRepository.existsByComment_IdAndLikedBy_Id(
                 comment.getId(),
                 userId
         );
