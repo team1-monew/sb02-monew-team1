@@ -7,9 +7,18 @@ public record ErrorResponse(
     Instant timestamp,
     int status,
     String message,
-    Map<String, Object> details
+    Map<String, Object> details,
+    String exceptionType,
+    String code
 ) {
-  public ErrorResponse(Code code, Map<String, Object> details) {
-    this(Instant.now(), code.getStatus().value(), code.getMessage(), details);
+  public ErrorResponse(RestException e) {
+    this(
+        Instant.now(),
+        e.getErrorCode().getStatus().value(),
+        e.getMessage(),
+        e.getDetails(),
+        e.getClass().getSimpleName(),
+        e.getErrorCode().name()
+    );
   }
 }
