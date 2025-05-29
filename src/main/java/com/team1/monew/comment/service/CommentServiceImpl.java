@@ -2,11 +2,11 @@ package com.team1.monew.comment.service;
 
 import com.team1.monew.article.entity.Article;
 import com.team1.monew.article.repository.ArticleRepository;
-import com.team1.monew.comment.repository.CommentRepository;
 import com.team1.monew.comment.dto.CommentDto;
 import com.team1.monew.comment.dto.CommentRegisterRequest;
 import com.team1.monew.comment.entity.Comment;
 import com.team1.monew.comment.mapper.CommentMapper;
+import com.team1.monew.comment.repository.CommentRepository;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
 import com.team1.monew.user.entity.User;
@@ -49,11 +49,7 @@ public class CommentServiceImpl implements CommentService {
                 ));
             });
 
-        Comment newComment = Comment.builder()
-            .content(request.content())
-            .user(user)
-            .article(article)
-            .build();
+        Comment newComment = new Comment(article, user, request.content());
 
         Comment savedComment = commentRepository.save(newComment);
         log.info("댓글 저장 성공 - commentId: {}", savedComment.getId());
