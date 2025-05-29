@@ -11,11 +11,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name= "comment_likes")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommentLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
