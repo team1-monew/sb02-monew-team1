@@ -3,6 +3,7 @@ package com.team1.monew.comment.controller;
 import com.team1.monew.comment.dto.CommentDto;
 import com.team1.monew.comment.dto.CommentRegisterRequest;
 import com.team1.monew.comment.service.CommentService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<CommentDto> create(@RequestBody CommentRegisterRequest request) {
+    public ResponseEntity<CommentDto> create(@RequestBody @Valid CommentRegisterRequest request) {
         CommentDto commentDto = commentService.register(request);
 
         return ResponseEntity
