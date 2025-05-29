@@ -13,8 +13,10 @@ import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
 import java.util.Map;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @AllArgsConstructor
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -27,12 +29,25 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto register(CommentRegisterRequest request) {
+        log.info("댓글 등록 요청 - articleId: {}, userId: {}", request.articleId(), request.userId());
 
         User user = userRepository.findById(request.userId())
-            .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND, Map.of("userId", request.userId(), "detail", "User not found")));
+            .orElseThrow(() -> {
+                log.warn("사용자 조회 실패 - userId: {}", request.userId());
+                return new RestException(ErrorCode.NOT_FOUND, Map.of(
+                    "userId", request.userId(),
+                    "detail", "User not found"
+                ));
+            });
 
         Article article = articleRepository.findById(request.articleId())
-            .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND, Map.of("articleId", request.articleId(), "detail", "Article not found")));
+            .orElseThrow(() -> {
+                log.warn("기사 조회 실패 - articleId: {}", request.articleId());
+                return new RestException(ErrorCode.NOT_FOUND, Map.of(
+                    "articleId", request.articleId(),
+                    "detail", "Article not found"
+                ));
+            });
 
         Comment newComment = Comment.builder()
             .content(request.content())
@@ -41,7 +56,11 @@ public class CommentServiceImpl implements CommentService {
             .build();
 
         Comment savedComment = commentRepository.save(newComment);
+        log.info("댓글 저장 성공 - commentId: {}", savedComment.getId());
 
-        return commentMapper.toDto(savedComment, request.userId());
+        CommentDto dto = commentMapper.toDto(savedComment, request.userId());
+        log.debug("댓글 DTO 반환 - {}", dto);
+
+        return dto;
     }
 }
