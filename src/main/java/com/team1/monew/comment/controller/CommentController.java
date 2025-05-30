@@ -66,4 +66,17 @@ public class CommentController {
                 .noContent()
                 .build();
     }
+
+    @DeleteMapping("/{commentId}/hard")
+    public ResponseEntity<Void> hardDelete(@PathVariable Long commentId) {
+        log.info("DELETE /api/comments/{}/hard 요청 수신", commentId);
+
+        commentService.hardDelete(commentId);
+
+        log.info("댓글 삭제 요청 성공 - commentId: {}", commentId);
+
+        return ResponseEntity
+            .noContent()
+            .build();
+    }
 }
