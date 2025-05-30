@@ -3,6 +3,14 @@ package com.team1.monew.interest.service;
 import com.team1.monew.exception.RestException;
 import com.team1.monew.interest.dto.InterestDto;
 import com.team1.monew.interest.dto.InterestRegisterRequest;
+import com.team1.monew.interest.dto.InterestUpdateRequest;
+import com.team1.monew.interest.entity.Interest;
+import com.team1.monew.interest.entity.Keyword;
+import com.team1.monew.interest.mapper.InterestMapper;
+import com.team1.monew.interest.repository.InterestRepository;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.interest.mapper.InterestMapper;
 import com.team1.monew.interest.repository.InterestRepository;
@@ -15,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.mockito.BDDMockito.*;
 import static org.assertj.core.api.Assertions.*;
@@ -91,5 +100,40 @@ public class InterestServiceTest {
     then(interestRepository).should(times(1)).save(any(Interest.class));
   }
 
+  @Test
+  @DisplayName("관심사 수정 성공")
+  void updateInterest_success() {
+    // given
+    Interest interest = new Interest("테스트용");
+    ReflectionTestUtils.setField(interest, "id",1L);
+    interest.addKeyword(new Keyword("테스트"));
+    interest.addKeyword(new Keyword("키워드"));
+    InterestUpdateRequest interestUpdateRequest = new InterestUpdateRequest(List.of("수정", "테스트"));
 
+    given(interestRepository.findByIdFetch(any(Long.class))).willReturn(Optional.of(interest));
+    given(interestRepository.save(any(Interest.class))).willReturn(interest);
+
+    // when
+    InterestDto interestDto = interestService.update(1L,interestUpdateRequest);
+
+    // then
+    assertThat(interestDto.keywords())
+        .containsExactlyInAnyOrderElementsOf(interestUpdateRequest.keywords());
+    then(interestRepository).should(times(1)).findByIdFetch(any(Long.class));
+    then(interestRepository).should(times(1)).save(any(Interest.class));
+  }
+
+  @Test
+  @DisplayName("관심사가 존재하지 않을 때, 관심사 수정 실패")
+  void updateInterest_notFoundInterest_failed() {
+    // given
+    InterestUpdateRequest interestUpdateRequest = new InterestUpdateRequest(List.of("수정", "테스트"));
+    given(interestRepository.findByIdFetch(any(Long.class))).willReturn(Optional.empty());
+
+    // when + then
+    assertThatThrownBy(() -> interestService.update(1L,interestUpdateRequest))
+        .isInstanceOf(RestException.class)
+        .hasMessageContaining("찾을 수 없습니다.");
+    then(interestRepository).should(never()).save(any(Interest.class));
+  }
 }
