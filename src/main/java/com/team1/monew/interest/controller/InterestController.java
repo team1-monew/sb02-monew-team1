@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,10 +23,11 @@ public class InterestController {
   private final InterestService interestService;
 
   @PostMapping
-  public ResponseEntity<InterestDto> create(@RequestBody @Valid InterestRegisterRequest interestRegisterRequest) {
-    log.info("관심사 생성 요청- 관심사 이름: {}", interestRegisterRequest.name());
+  public ResponseEntity<InterestDto> create(
+      @RequestBody @Valid InterestRegisterRequest interestRegisterRequest,
+      @RequestHeader("Monew-Request-User-ID") Long userId) {
+    log.info("관심사 생성 요청 - userId: {}, interestName: {}", userId, interestRegisterRequest.name());
     InterestDto interestDto = interestService.create(interestRegisterRequest);
     return ResponseEntity.status(HttpStatus.CREATED).body(interestDto);
   }
-
 }

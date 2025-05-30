@@ -16,6 +16,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -26,6 +27,7 @@ public class InterestServiceImpl implements InterestService {
   private final InterestMapper interestMapper;
 
   @Override
+  @Transactional
   public InterestDto create(InterestRegisterRequest interestRegisterRequest) {
     checkSimilarityInterestName(interestRegisterRequest.name());
     Interest interest = new Interest(interestRegisterRequest.name());
@@ -68,7 +70,7 @@ public class InterestServiceImpl implements InterestService {
       double similarity = (double) totalMatch / baseLength;
 
       if (similarity >= 0.8) {
-        log.warn("관심사 등록 실패: 유사도 80% 이상, {} / {}", name, existing);
+        log.warn("관심사 등록 실패 - 유사도 80% 이상, name: {} / existing: {}", name, existing);
         throw new RestException(ErrorCode.SIMILARITY_OVER_VIOLATION, Map.of("interestName", name));
       }
     }
