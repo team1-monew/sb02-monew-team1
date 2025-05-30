@@ -11,6 +11,7 @@ import com.team1.monew.article.entity.Article;
 import com.team1.monew.article.repository.ArticleRepository;
 import com.team1.monew.comment.dto.CommentDto;
 import com.team1.monew.comment.dto.CommentRegisterRequest;
+import com.team1.monew.comment.dto.CommentUpdateRequest;
 import com.team1.monew.comment.entity.Comment;
 import com.team1.monew.comment.mapper.CommentMapper;
 import com.team1.monew.comment.repository.CommentLikeRepository;
@@ -119,4 +120,86 @@ public class CommentServiceImplTest {
         assertThrows(RestException.class, () -> commentService.register(request));
         verify(articleRepository).findById(articleId);
     }
+
+    @Test
+    void 댓글수정_성공() {
+        // given
+        Long userId = 1L;
+        Long commentId = 100L;
+        String updatedContent = "수정된 댓글입니다.";
+
+        CommentUpdateRequest request = new CommentUpdateRequest(updatedContent);
+
+        User mockUser = mock(User.class);
+        when(mockUser.getId()).thenReturn(userId);
+
+        Article mockArticle = mock(Article.class);
+
+        Comment mockComment = mock(Comment.class);
+        when(mockComment.getUser()).thenReturn(mockUser);
+
+        CommentDto expectedDto = CommentDto.builder()
+            .id(commentId)
+            .articleId(mockArticle.getId())
+            .userId(userId)
+            .userNickname("MockUser")
+            .content(updatedContent)
+            .createdAt(Instant.now())
+            .likeCount(0L)
+            .likedByMe(true)
+            .build();
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
+        when(commentLikeRepository.existsByComment_IdAndLikedBy_Id(commentId, userId)).thenReturn(true);
+        when(commentMapper.toDto(mockComment, true)).thenReturn(expectedDto);
+
+        // when
+        CommentDto result = commentService.update(request, commentId, userId);
+
+        // then
+        assertEquals(expectedDto.id(), result.id());
+        assertEquals(expectedDto.content(), result.content());
+        assertEquals(expectedDto.userId(), result.userId());
+
+        verify(commentRepository).findById(commentId);
+        verify(mockComment).update(updatedContent);
+        verify(commentMapper).toDto(mockComment, true);
+    }
+
+    @Test
+    void 댓글수정_예외발생_댓글없음() {
+        // given
+        Long commentId = 999L;
+        Long userId = 1L;
+        CommentUpdateRequest request = new CommentUpdateRequest("수정");
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThrows(RestException.class, () -> commentService.update(request, commentId, userId));
+        verify(commentRepository).findById(commentId);
+    }
+
+    @Test
+    void 댓글수정_예외발생_권한없음() {
+        // given
+        Long commentId = 100L;
+        Long writerId = 1L;
+        Long otherUserId = 2L;
+
+        CommentUpdateRequest request = new CommentUpdateRequest("수정");
+
+        User writer = mock(User.class);
+        when(writer.getId()).thenReturn(writerId);
+
+        Comment comment = mock(Comment.class);
+        when(comment.getUser()).thenReturn(writer);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        // when & then
+        assertThrows(RestException.class, () -> commentService.update(request, commentId, otherUserId));
+        verify(commentRepository).findById(commentId);
+    }
+
 }
