@@ -1,8 +1,11 @@
 package com.team1.monew.article.service;
 
+import com.team1.monew.article.collector.CollectedArticleDto;
+import com.team1.monew.article.collector.NewsCollector;
 import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.article.dto.ArticleViewDto;
 import com.team1.monew.article.entity.Article;
+import com.team1.monew.article.entity.ArticleInterest;
 import com.team1.monew.article.entity.ArticleView;
 import com.team1.monew.article.mapper.ArticleMapper;
 import com.team1.monew.article.mapper.ArticleViewMapper;
@@ -11,25 +14,57 @@ import com.team1.monew.article.repository.ArticleViewRepository;
 import com.team1.monew.comment.Repository.CommentRepository;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
+import com.team1.monew.interest.entity.Interest;
+import com.team1.monew.interest.entity.Keyword;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ArticleServiceImpl implements ArticleService {
 
   private final ArticleRepository articleRepository;
   private final ArticleViewRepository articleViewRepository;
   private final UserRepository userRepository;
   private final CommentRepository commentRepository;
+  private final NewsCollector naverNewsCollector;
+
+  @Override
+  @Transactional
+  public void collectAndSaveArticles(Interest interest, Keyword keyword) {
+    List<CollectedArticleDto> collectedArticles = naverNewsCollector.collect(interest, keyword);
+
+    for (CollectedArticleDto dto : collectedArticles) {
+      if (articleRepository.existsBySourceUrl(dto.sourceUrl())) continue;
+
+      log.info("📝 Saving article: {} | publishDate: {}", dto.title(), dto.publishDate());
+
+      Article article = Article.builder()
+          .title(dto.title())
+          .summary(dto.summary())
+          .source(dto.source())
+          .sourceUrl(dto.sourceUrl())
+          .publishDate(dto.publishDate())
+          .viewCount(0L)
+          .createdAt(LocalDateTime.now())
+          .build();
+
+      ArticleInterest relation = new ArticleInterest(interest, article);
+      article.addArticleInterest(relation);
+
+      articleRepository.save(article);
+    }
+  }
 
   @Override
   @Transactional
@@ -57,12 +92,12 @@ public class ArticleServiceImpl implements ArticleService {
       String keyword,
       String interestId,
       List<String> sourceIn,
-      Instant publishDateFrom,
-      Instant publishDateTo,
+      LocalDateTime publishDateFrom,
+      LocalDateTime publishDateTo,
       String orderBy,
       String direction,
       String cursor,
-      Instant after,
+      LocalDateTime after,
       int limit,
       String requestUserId) {
 
@@ -85,7 +120,7 @@ public class ArticleServiceImpl implements ArticleService {
 
   @Override
   @Transactional
-  public void restoreArticles(Instant from, Instant to) {
+  public void restoreArticles(LocalDateTime from, LocalDateTime to) {
     List<Article> deletedArticles = articleRepository.findAll().stream()
         .filter(Article::isDeleted)
         .filter(a -> !a.getCreatedAt().isBefore(from) && !a.getCreatedAt().isAfter(to))

@@ -2,15 +2,17 @@ package com.team1.monew.article.entity;
 
 import com.team1.monew.user.entity.User;
 import jakarta.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
 @Table(name = "article_views")
@@ -25,15 +27,16 @@ public class ArticleView {
     private Article article;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "viewed_by", nullable = false)
     private User viewedBy;
 
+    @CreatedDate
     @Column(nullable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     public ArticleView(Article article, User viewedBy) {
         this.article = article;
         this.viewedBy = viewedBy;
-        this.createdAt = Instant.now();
+        this.createdAt = LocalDateTime.now();
     }
 }
