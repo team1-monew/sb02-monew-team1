@@ -10,13 +10,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "subscriptions")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Subscription {
     @Id
@@ -32,11 +33,11 @@ public class Subscription {
     private Interest interest;
 
     @Column(nullable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     public Subscription(User user, Interest interest) {
         this.user = user;
         this.interest = interest;
-        this.createdAt = Instant.now();
+        this.createdAt = LocalDateTime.now();
     }
 }
