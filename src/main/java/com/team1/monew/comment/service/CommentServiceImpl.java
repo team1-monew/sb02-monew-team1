@@ -4,6 +4,7 @@ import com.team1.monew.article.entity.Article;
 import com.team1.monew.article.repository.ArticleRepository;
 import com.team1.monew.comment.dto.CommentDto;
 import com.team1.monew.comment.dto.CommentRegisterRequest;
+import com.team1.monew.comment.dto.CommentUpdateRequest;
 import com.team1.monew.comment.entity.Comment;
 import com.team1.monew.comment.mapper.CommentMapper;
 import com.team1.monew.comment.repository.CommentLikeRepository;
@@ -13,6 +14,7 @@ import com.team1.monew.exception.RestException;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
 import java.util.Map;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -62,6 +64,39 @@ public class CommentServiceImpl implements CommentService {
         );
 
         CommentDto dto = commentMapper.toDto(savedComment, likedByMe);
+        log.debug("댓글 DTO 반환 - {}", dto);
+
+        return dto;
+    }
+
+    @Override
+    public CommentDto update(CommentUpdateRequest request, Long commentId, Long userId) {
+        log.info("댓글 수정 요청 - commentId: {}, userId: {}", commentId, userId);
+
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(()-> {
+                log.warn("댓글 조회 실패 - commentId: {}", commentId);
+                return new RestException(ErrorCode.NOT_FOUND, Map.of(
+                    "commentId", commentId,
+                    "detail", "Comment not found"
+                ));
+            });
+
+        if (!Objects.equals(comment.getUser().getId(), userId)) {
+            log.warn("댓글 수정 권한 없음 - commentId: {}, userId: {}", commentId, userId);
+            throw new RestException(ErrorCode.FORBIDDEN, Map.of(
+                "commentId", commentId,
+                "userId", userId,
+                "detail", "You do not have permission to update this comment"
+            ));
+        }
+
+        comment.update(request.content());
+        log.info("댓글 내용 수정 - newContent: {}", request.content());
+
+        boolean likedByMe = commentLikeRepository.existsByComment_IdAndLikedBy_Id(commentId, userId);
+
+        CommentDto dto = commentMapper.toDto(comment, likedByMe);
         log.debug("댓글 DTO 반환 - {}", dto);
 
         return dto;
