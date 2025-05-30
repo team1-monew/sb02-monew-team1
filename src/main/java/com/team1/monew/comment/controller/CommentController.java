@@ -39,7 +39,7 @@ public class CommentController {
 
     @PatchMapping("/{commentId}")
     public ResponseEntity<CommentDto> update(
-            @RequestBody CommentUpdateRequest request,
+            @RequestBody @Valid CommentUpdateRequest request,
             @PathVariable Long commentId,
             @RequestHeader("Monew-Request-User-ID") Long userId
         ) {
