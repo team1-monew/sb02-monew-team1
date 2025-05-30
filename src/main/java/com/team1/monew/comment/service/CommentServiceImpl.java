@@ -18,6 +18,7 @@ import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @AllArgsConstructor
@@ -31,6 +32,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
 
 
+    @Transactional
     @Override
     public CommentDto register(CommentRegisterRequest request) {
         log.info("댓글 등록 요청 - articleId: {}, userId: {}", request.articleId(), request.userId());
@@ -69,6 +71,7 @@ public class CommentServiceImpl implements CommentService {
         return dto;
     }
 
+    @Transactional
     @Override
     public CommentDto update(CommentUpdateRequest request, Long commentId, Long userId) {
         log.info("댓글 수정 요청 - commentId: {}, userId: {}", commentId, userId);
@@ -102,6 +105,7 @@ public class CommentServiceImpl implements CommentService {
         return dto;
     }
 
+    @Transactional
     @Override
     public void softDelete(Long commentId, Long userId) {
         log.info("댓글 소프트 삭제 요청 - commentId: {}, userId: {}", commentId, userId);
