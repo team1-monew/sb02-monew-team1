@@ -18,6 +18,7 @@ import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @AllArgsConstructor
@@ -31,6 +32,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
 
 
+    @Transactional
     @Override
     public CommentDto register(CommentRegisterRequest request) {
         log.info("댓글 등록 요청 - articleId: {}, userId: {}", request.articleId(), request.userId());
@@ -69,6 +71,7 @@ public class CommentServiceImpl implements CommentService {
         return dto;
     }
 
+    @Transactional
     @Override
     public CommentDto update(CommentUpdateRequest request, Long commentId, Long userId) {
         log.info("댓글 수정 요청 - commentId: {}, userId: {}", commentId, userId);
@@ -100,5 +103,52 @@ public class CommentServiceImpl implements CommentService {
         log.debug("댓글 DTO 반환 - {}", dto);
 
         return dto;
+    }
+
+    @Transactional
+    @Override
+    public void softDelete(Long commentId, Long userId) {
+        log.info("댓글 소프트 삭제 요청 - commentId: {}, userId: {}", commentId, userId);
+
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(()-> {
+                log.warn("댓글 조회 실패 - commentId: {}", commentId);
+                return new RestException(ErrorCode.NOT_FOUND, Map.of(
+                    "commentId", commentId,
+                    "detail", "Comment not found"
+                ));
+            });
+
+        if (!Objects.equals(comment.getUser().getId(), userId)) {
+            log.warn("댓글 삭제 권한 없음 - commentId: {}, userId: {}", commentId, userId);
+            throw new RestException(ErrorCode.FORBIDDEN, Map.of(
+                "commentId", commentId,
+                "userId", userId,
+                "detail", "You do not have permission to soft delete this comment"
+            ));
+        }
+
+        comment.delete();
+
+        log.info("댓글 소프트 삭제 완료 - commentId: {}", commentId);
+    }
+
+    @Transactional
+    @Override
+    public void hardDelete(Long commentId) {
+        log.info("댓글 하드 삭제 요청 - commentId: {}", commentId);
+
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(()-> {
+                log.warn("댓글 조회 실패 - commentId: {}", commentId);
+                return new RestException(ErrorCode.NOT_FOUND, Map.of(
+                    "commentId", commentId,
+                    "detail", "Comment not found"
+                ));
+            });
+
+        commentRepository.delete(comment);
+
+        log.info("댓글 하드 삭제 완료 - commentId: {}", commentId);
     }
 }
