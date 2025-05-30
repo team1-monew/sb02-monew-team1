@@ -101,4 +101,31 @@ public class CommentServiceImpl implements CommentService {
 
         return dto;
     }
+
+    @Override
+    public void softDelete(Long commentId, Long userId) {
+        log.info("댓글 소프트 삭제 요청 - commentId: {}, userId: {}", commentId, userId);
+
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(()-> {
+                log.warn("댓글 조회 실패 - commentId: {}", commentId);
+                return new RestException(ErrorCode.NOT_FOUND, Map.of(
+                    "commentId", commentId,
+                    "detail", "Comment not found"
+                ));
+            });
+
+        if (!Objects.equals(comment.getUser().getId(), userId)) {
+            log.warn("댓글 삭제 권한 없음 - commentId: {}, userId: {}", commentId, userId);
+            throw new RestException(ErrorCode.FORBIDDEN, Map.of(
+                "commentId", commentId,
+                "userId", userId,
+                "detail", "You do not have permission to soft delete this comment"
+            ));
+        }
+
+        comment.delete();
+
+        log.info("댓글 소프트 삭제 완료 - commentId: {}", commentId);
+    }
 }
