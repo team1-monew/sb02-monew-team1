@@ -6,14 +6,16 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "keywords")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Keyword {
     
@@ -22,15 +24,17 @@ public class Keyword {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "interest_id")
     private Interest interest;
 
     @Column(nullable = false)
     private String keyword;
 
-    public Keyword(Interest interest, String keyword) {
+    public void updateInterest(Interest interest) {
         this.interest = interest;
-        this.keyword = keyword;
     }
 
-
+    public Keyword(String keyword) {
+        this.keyword = keyword;
+    }
 }
