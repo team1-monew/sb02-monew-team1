@@ -1,10 +1,10 @@
 package com.team1.monew.comment.dto;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record CommentLikeActivityDto(
     Long id,
-    Instant createdAt,
+    LocalDateTime createdAt,
     Long commentId,
     Long articleId,
     String articleTitle,
@@ -12,7 +12,7 @@ public record CommentLikeActivityDto(
     String commentUserNickname,
     String commentContent,
     Long commentLikeCount,
-    Instant commentCreatedAt
+    LocalDateTime commentCreatedAt
 ) {
 
 }

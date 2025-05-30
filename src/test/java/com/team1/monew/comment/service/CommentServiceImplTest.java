@@ -19,7 +19,7 @@ import com.team1.monew.comment.repository.CommentRepository;
 import com.team1.monew.exception.RestException;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,7 +68,7 @@ public class CommentServiceImplTest {
             .userId(userId)
             .userNickname("MockUser")
             .content(content)
-            .createdAt(Instant.now())
+            .createdAt(LocalDateTime.now())
             .likeCount(0L)
             .likedByMe(false)
             .build();
@@ -144,7 +144,7 @@ public class CommentServiceImplTest {
             .userId(userId)
             .userNickname("MockUser")
             .content(updatedContent)
-            .createdAt(Instant.now())
+            .createdAt(LocalDateTime.now())
             .likeCount(0L)
             .likedByMe(true)
             .build();
