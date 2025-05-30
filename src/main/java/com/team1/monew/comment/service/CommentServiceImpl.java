@@ -6,6 +6,7 @@ import com.team1.monew.comment.dto.CommentDto;
 import com.team1.monew.comment.dto.CommentRegisterRequest;
 import com.team1.monew.comment.entity.Comment;
 import com.team1.monew.comment.mapper.CommentMapper;
+import com.team1.monew.comment.repository.CommentLikeRepository;
 import com.team1.monew.comment.repository.CommentRepository;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
+    private final CommentLikeRepository commentLikeRepository;
     private final ArticleRepository articleRepository;
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
@@ -54,7 +56,12 @@ public class CommentServiceImpl implements CommentService {
         Comment savedComment = commentRepository.save(newComment);
         log.info("댓글 저장 성공 - commentId: {}", savedComment.getId());
 
-        CommentDto dto = commentMapper.toDto(savedComment, request.userId());
+        boolean likedByMe = commentLikeRepository.existsByComment_IdAndLikedBy_Id(
+            savedComment.getId(),
+            request.userId()
+        );
+
+        CommentDto dto = commentMapper.toDto(savedComment, likedByMe);
         log.debug("댓글 DTO 반환 - {}", dto);
 
         return dto;

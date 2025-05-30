@@ -13,6 +13,7 @@ import com.team1.monew.comment.dto.CommentDto;
 import com.team1.monew.comment.dto.CommentRegisterRequest;
 import com.team1.monew.comment.entity.Comment;
 import com.team1.monew.comment.mapper.CommentMapper;
+import com.team1.monew.comment.repository.CommentLikeRepository;
 import com.team1.monew.comment.repository.CommentRepository;
 import com.team1.monew.exception.RestException;
 import com.team1.monew.user.entity.User;
@@ -30,6 +31,9 @@ public class CommentServiceImplTest {
 
     @Mock
     private CommentRepository commentRepository;
+
+    @Mock
+    private CommentLikeRepository commentLikeRepository;
 
     @Mock
     private ArticleRepository articleRepository;
@@ -64,12 +68,14 @@ public class CommentServiceImplTest {
             .userNickname("MockUser")
             .content(content)
             .createdAt(Instant.now())
+            .likeCount(0L)
+            .likedByMe(false)
             .build();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(articleRepository.findById(articleId)).thenReturn(Optional.of(mockArticle));
         when(commentRepository.save(any(Comment.class))).thenReturn(mockComment);
-        when(commentMapper.toDto(mockComment, userId)).thenReturn(expectedDto);
+        when(commentMapper.toDto(mockComment, false)).thenReturn(expectedDto);
 
         // when
         CommentDto result = commentService.register(request);
@@ -82,7 +88,7 @@ public class CommentServiceImplTest {
         verify(userRepository).findById(userId);
         verify(articleRepository).findById(articleId);
         verify(commentRepository).save(any(Comment.class));
-        verify(commentMapper).toDto(mockComment, userId);
+        verify(commentMapper).toDto(mockComment, false);
     }
 
     @Test
