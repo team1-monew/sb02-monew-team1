@@ -203,7 +203,7 @@ public class CommentServiceImplTest {
     }
 
     @Test
-    void 댓글삭제_성공() {
+    void 댓글논리삭제_성공() {
         // given
         Long commentId = 100L;
         Long userId = 1L;
@@ -225,7 +225,7 @@ public class CommentServiceImplTest {
     }
 
     @Test
-    void 댓글삭제_예외발생_댓글없음() {
+    void 댓글논리삭제_예외발생_댓글없음() {
         // given
         Long commentId = 999L;
         Long userId = 1L;
@@ -238,7 +238,7 @@ public class CommentServiceImplTest {
     }
 
     @Test
-    void 댓글삭제_예외발생_권한없음() {
+    void 댓글논리삭제_예외발생_권한없음() {
         // given
         Long commentId = 100L;
         Long writerId = 1L;
@@ -256,4 +256,35 @@ public class CommentServiceImplTest {
         assertThrows(RestException.class, () -> commentService.softDelete(commentId, otherUserId));
         verify(commentRepository).findById(commentId);
     }
+
+    @Test
+    void 댓글물리삭제_성공() {
+        // given
+        Long commentId = 100L;
+
+        Comment mockComment = mock(Comment.class);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(mockComment));
+
+        // when
+        commentService.hardDelete(commentId);
+
+        // then
+        verify(commentRepository).findById(commentId);
+        verify(commentRepository).delete(mockComment);
+    }
+
+    @Test
+    void 댓글물리삭제_예외발생_댓글없음() {
+        // given
+        Long commentId = 999L;
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThrows(RestException.class, () -> commentService.hardDelete(commentId));
+        verify(commentRepository).findById(commentId);
+    }
+
+
 }
