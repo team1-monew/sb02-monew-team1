@@ -1,6 +1,5 @@
 package com.team1.monew.comment.mapper;
 
-import com.team1.monew.comment.repository.CommentLikeRepository;
 import com.team1.monew.comment.dto.CommentDto;
 import com.team1.monew.comment.entity.Comment;
 import lombok.AllArgsConstructor;
@@ -10,13 +9,8 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class CommentMapper {
 
-    private final CommentLikeRepository commentLikeRepository;
+    public CommentDto toDto(Comment comment, boolean likedByMe) {
 
-    public CommentDto toDto(Comment comment, Long userId) {
-        boolean likedByMe = commentLikeRepository.existsByComment_IdAndLikedBy_Id(
-                comment.getId(),
-                userId
-        );
         return CommentDto.builder()
                 .id(comment.getId())
                 .articleId(comment.getArticle().getId())
