@@ -62,9 +62,16 @@ public class InterestServiceImpl implements InterestService {
   }
 
   @Override
+  @Transactional
   public void delete(Long id) {
-
+    Interest interest = interestRepository.findByIdFetch(id)
+        .orElseThrow(() -> {
+          log.warn("관심사 삭제 실패 - 해당 관심사가 존재하지 않음, id: {}", id);
+          return new RestException(ErrorCode.NOT_FOUND, Map.of("id", id));
+        });
+    interestRepository.deleteById(id);
   }
+
 
   // 연속된 앞쪽(접두사) + 뒷쪽(접미사) 문자의 유사도가 80%가 넘는지 테스트
   private void checkSimilarityInterestName(String name) {

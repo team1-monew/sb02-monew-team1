@@ -8,13 +8,8 @@ import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.interest.entity.Keyword;
 import com.team1.monew.interest.mapper.InterestMapper;
 import com.team1.monew.interest.repository.InterestRepository;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import com.team1.monew.interest.entity.Interest;
-import com.team1.monew.interest.mapper.InterestMapper;
-import com.team1.monew.interest.repository.InterestRepository;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -135,5 +130,34 @@ public class InterestServiceTest {
         .isInstanceOf(RestException.class)
         .hasMessageContaining("찾을 수 없습니다.");
     then(interestRepository).should(never()).save(any(Interest.class));
+  }
+
+  @Test
+  @DisplayName("관심사 삭제 성공")
+  void deleteInterest_success() {
+    // given
+    Interest interest = new Interest("테스트용");
+    ReflectionTestUtils.setField(interest, "id",1L);
+    given(interestRepository.findByIdFetch(any(Long.class))).willReturn(Optional.of(interest));
+
+    // when
+    interestService.delete(1L);
+
+    // then
+    then(interestRepository).should(times(1)).deleteById(any(Long.class));
+  }
+
+  @Test
+  @DisplayName("관심사가 존재하지 않을 때, 관심사 삭제 실패")
+  void deleteInterest_notFoundInterest_failed() {
+    // given
+    given(interestRepository.findByIdFetch(any(Long.class))).willReturn(Optional.empty());
+
+    // when + then
+    assertThatThrownBy(() -> interestService.delete(1L))
+        .isInstanceOf(RestException.class)
+        .hasMessageContaining("찾을 수 없습니다.");
+
+    then(interestRepository).should(never()).deleteById(any(Long.class));
   }
 }
