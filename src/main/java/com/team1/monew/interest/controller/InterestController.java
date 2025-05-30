@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,5 +43,14 @@ public class InterestController {
     log.info("관심사 수정 요청 - userId: {}, interestId: {}", userId, interestId);
     InterestDto interestDto = interestService.update(interestId, interestUpdateRequest);
     return ResponseEntity.status(HttpStatus.OK).body(interestDto);
+  }
+
+  @DeleteMapping("/{interestId}")
+  public ResponseEntity<Void> delete(
+      @PathVariable("interestId") Long interestId,
+      @RequestHeader("Monew-Request-User-ID") Long userId) {
+    log.info("관심사 삭제 요청 - userId: {}, interestId: {}", userId, interestId);
+    interestService.delete(interestId);
+    return ResponseEntity.noContent().build();
   }
 }
