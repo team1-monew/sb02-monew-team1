@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,5 +52,18 @@ public class CommentController {
 
         return ResponseEntity
                 .ok(updatedCommentDto);
+    }
+
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Void> softDelete(@PathVariable Long commentId, @RequestHeader("Monew-Request-User-ID") Long userId) {
+        log.info("DELETE /api/comments/{} 요청 수신 - userId: {}", commentId, userId);
+
+        commentService.softDelete(commentId, userId);
+
+        log.info("댓글 삭제 요청 성공 - commentId: {}", commentId);
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }
