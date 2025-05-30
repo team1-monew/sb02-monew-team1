@@ -31,4 +31,16 @@ public class UserController {
         .status(HttpStatus.CREATED)
         .body(createdUser);
   }
+
+  @PostMapping("/login")
+  public ResponseEntity<UserDto> login(
+      @RequestBody UserLoginRequest userLoginRequest
+  ) {
+    log.info("로그인 요청: email={}", userLoginRequest.email());
+    UserDto createdUser = userService.login(userLoginRequest);
+    log.debug("로그인 응답: {}", createdUser);
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(createdUser);
+  }
 }

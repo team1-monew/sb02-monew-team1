@@ -8,10 +8,12 @@ import static org.mockito.Mockito.verify;
 
 import com.team1.monew.exception.RestException;
 import com.team1.monew.user.dto.UserDto;
+import com.team1.monew.user.dto.UserLoginRequest;
 import com.team1.monew.user.dto.UserRegisterRequest;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.mapper.UserMapper;
 import com.team1.monew.user.repository.UserRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,22 +34,28 @@ class UserServiceImplTest {
   @InjectMocks
   UserServiceImpl userService;
 
-  private UserRegisterRequest request;
+  private UserRegisterRequest userRegisterRequest;
+  private UserLoginRequest userLoginRequest;
   private User user;
   private UserDto userDto;
 
   @BeforeEach
   void setUp() {
-    request = new UserRegisterRequest(
-        "user1@email.com",
-        "user1",
-        "user1@@@"
-    );
+    userRegisterRequest = UserRegisterRequest.builder()
+        .email("user1@email.com")
+        .nickname("user1")
+        .password("user1@@@")
+        .build();
+
+    userLoginRequest = UserLoginRequest.builder()
+        .email("user1@email.com")
+        .password("user1@@@")
+        .build();
 
     user = User.builder()
-        .email(request.email())
-        .nickname(request.nickname())
-        .password(request.password())
+        .email(userRegisterRequest.email())
+        .nickname(userRegisterRequest.nickname())
+        .password(userRegisterRequest.password())
         .build();
 
     ReflectionTestUtils.setField(user, "id", 1L);
@@ -64,12 +72,12 @@ class UserServiceImplTest {
   @DisplayName("createUser() 성공")
   void createUser_saveUser_returnUserDto() {
     // given
-    given(userRepository.existsByEmail(request.email())).willReturn(false);
+    given(userRepository.existsByEmail(userRegisterRequest.email())).willReturn(false);
     given(userRepository.save(any(User.class))).willReturn(user);
     given(userMapper.toDto(any(User.class))).willReturn(userDto);
 
     // when
-    UserDto result = userService.createUser(request);
+    UserDto result = userService.createUser(userRegisterRequest);
 
     // then
     assertThat(result).isEqualTo(userDto);
@@ -81,20 +89,35 @@ class UserServiceImplTest {
   @DisplayName("createUser() 실패 - 중복 이메일")
   void createUser_duplicateEmail_throwsException() {
     // given
-    given(userRepository.existsByEmail(request.email())).willReturn(true);
+    given(userRepository.existsByEmail(userRegisterRequest.email())).willReturn(true);
 
     // when & then
-    assertThrows(RestException.class, () -> userService.createUser(request));
+    assertThrows(RestException.class, () -> userService.createUser(userRegisterRequest));
+  }
+
+  @Test
+  @DisplayName("login() 성공")
+  void login() {
+    // given
+    given(userRepository.findByEmail(userLoginRequest.email())).willReturn(Optional.of(user));
+    given(userMapper.toDto(any(User.class))).willReturn(userDto);
+
+    // when
+    UserDto result = userService.login(userLoginRequest);
+
+    // then
+    assertThat(result).isEqualTo(userDto);
+    verify(userMapper).toDto(any(User.class));
   }
 
   @Test
   @DisplayName("중복 이메일 검증 시 예외 반환")
   void validateEmailNotDuplicated() {
     // given
-    given(userRepository.existsByEmail(request.email())).willReturn(true);
+    given(userRepository.existsByEmail(userRegisterRequest.email())).willReturn(true);
 
     // when & then
     assertThrows(RestException.class, () ->
-        userService.validateEmailNotDuplicated(request.email()));
+        userService.validateEmailNotDuplicated(userRegisterRequest.email()));
   }
 }

@@ -1,18 +1,18 @@
 package com.team1.monew.user.dto;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record UserDto(
     Long id,
     String email,
     String nickname,
-    Instant createdAt
+    LocalDateTime createdAt
 ) {
   public static class Builder {
     private Long id;
     private String email;
     private String nickname;
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     public Builder id(Long id) {
       this.id = id;
@@ -29,7 +29,7 @@ public record UserDto(
       return this;
     }
 
-    public Builder createdAt(Instant createdAt) {
+    public Builder createdAt(LocalDateTime createdAt) {
       this.createdAt = createdAt;
       return this;
     }
