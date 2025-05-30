@@ -132,4 +132,23 @@ public class CommentServiceImpl implements CommentService {
 
         log.info("댓글 소프트 삭제 완료 - commentId: {}", commentId);
     }
+
+    @Transactional
+    @Override
+    public void hardDelete(Long commentId) {
+        log.info("댓글 하드 삭제 요청 - commentId: {}", commentId);
+
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(()-> {
+                log.warn("댓글 조회 실패 - commentId: {}", commentId);
+                return new RestException(ErrorCode.NOT_FOUND, Map.of(
+                    "commentId", commentId,
+                    "detail", "Comment not found"
+                ));
+            });
+
+        commentRepository.delete(comment);
+
+        log.info("댓글 하드 삭제 완료 - commentId: {}", commentId);
+    }
 }
