@@ -1,6 +1,6 @@
 package com.team1.monew.interest.dto;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record SubscriptionDto(
@@ -9,7 +9,7 @@ public record SubscriptionDto(
     String interestName,
     List<String> interestKeywords,
     Long interestSubscriberCount,
-    Instant createdAt
+    LocalDateTime createdAt
 ) {
 
 }

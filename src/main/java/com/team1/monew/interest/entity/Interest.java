@@ -8,7 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -32,7 +32,7 @@ public class Interest {
     private Long subscriberCount = 0L;
 
     @Column(nullable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     // Interest가 save되면, 거기에 맞춰서 keyword가 save / remove됨 (Cascade, orphanRemoval)
     @OneToMany(mappedBy = "interest", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -44,13 +44,18 @@ public class Interest {
         keyword.updateInterest(this);
     }
 
+    public void updateKeywords(List<Keyword> keywords) {
+        this.keywords.clear();
+        keywords.forEach(this::addKeyword);
+    }
+
     public void updateSubscriberCount(Long count) {
         this.subscriberCount = count;
     }
 
     public Interest(String name) {
         this.name = name;
-        this.createdAt = Instant.now();
+        this.createdAt = LocalDateTime.now();
     }
 
 }
