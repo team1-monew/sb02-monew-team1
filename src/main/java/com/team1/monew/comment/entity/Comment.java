@@ -11,7 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,10 +37,10 @@ public class Comment {
     private String content;
 
     @Column(nullable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private Instant updatedAt;
+    private LocalDateTime updatedAt;
 
     @Column(nullable = false)
     private Long likeCount = 0L;
@@ -52,14 +52,14 @@ public class Comment {
         this.article = article;
         this.user = user;
         this.content = content;
-        this.createdAt = Instant.now();
+        this.createdAt = LocalDateTime.now();
         this.updatedAt = createdAt;
     }
 
     public void update(String newContent) {
         if (newContent != null && !newContent.equals(this.content)) {
             this.content = newContent;
-            this.updatedAt = Instant.now();
+            this.updatedAt = LocalDateTime.now();
         }
     }
 

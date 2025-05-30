@@ -1,6 +1,6 @@
 package com.team1.monew.comment.dto;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import lombok.Builder;
 
 @Builder
@@ -12,7 +12,7 @@ public record CommentDto(
     String content,
     Long likeCount,
     boolean likedByMe,
-    Instant createdAt
+    LocalDateTime createdAt
 ) {
 
 }

@@ -10,7 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -31,11 +31,11 @@ public class CommentLike {
     private User likedBy;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     public CommentLike(Comment comment, User likedBy) {
         this.comment = comment;
         this.likedBy = likedBy;
-        this.createdAt = Instant.now();
+        this.createdAt = LocalDateTime.now();
     }
 }
