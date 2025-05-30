@@ -202,4 +202,58 @@ public class CommentServiceImplTest {
         verify(commentRepository).findById(commentId);
     }
 
+    @Test
+    void 댓글삭제_성공() {
+        // given
+        Long commentId = 100L;
+        Long userId = 1L;
+
+        User writer = mock(User.class);
+        when(writer.getId()).thenReturn(userId);
+
+        Comment comment = mock(Comment.class);
+        when(comment.getUser()).thenReturn(writer);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        // when
+        commentService.softDelete(commentId, userId);
+
+        // then
+        verify(commentRepository).findById(commentId);
+        verify(comment).delete();
+    }
+
+    @Test
+    void 댓글삭제_예외발생_댓글없음() {
+        // given
+        Long commentId = 999L;
+        Long userId = 1L;
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThrows(RestException.class, () -> commentService.softDelete(commentId, userId));
+        verify(commentRepository).findById(commentId);
+    }
+
+    @Test
+    void 댓글삭제_예외발생_권한없음() {
+        // given
+        Long commentId = 100L;
+        Long writerId = 1L;
+        Long otherUserId = 2L;
+
+        User writer = mock(User.class);
+        when(writer.getId()).thenReturn(writerId);
+
+        Comment comment = mock(Comment.class);
+        when(comment.getUser()).thenReturn(writer);
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        // when & then
+        assertThrows(RestException.class, () -> commentService.softDelete(commentId, otherUserId));
+        verify(commentRepository).findById(commentId);
+    }
 }
