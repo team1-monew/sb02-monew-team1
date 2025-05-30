@@ -39,8 +39,21 @@ public class InterestServiceImpl implements InterestService {
   }
 
   @Override
+  @Transactional
   public InterestDto update(Long id, InterestUpdateRequest interestUpdateRequest) {
-    return null;
+    Interest interest = interestRepository.findByIdFetch(id)
+        .orElseThrow(() -> {
+          log.warn("관심사 수정 실패 - 해당 관심사가 존재하지 않음, id: {}", id);
+          return new RestException(ErrorCode.NOT_FOUND, Map.of("id", id));
+        });
+    List<Keyword> keywords = interestUpdateRequest.keywords()
+        .stream()
+        .map(Keyword::new)
+        .toList();
+
+    interest.updateKeywords(keywords);
+
+    return interestMapper.toDto(interestRepository.save(interest));
   }
 
   @Override
