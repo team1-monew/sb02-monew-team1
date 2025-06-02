@@ -180,11 +180,17 @@ public class ArticleServiceImpl implements ArticleService {
   @Override
   @Transactional
   public void deleteArticle(Long articleId) {
+    log.info("📝 기사 삭제 시작: articleId = {}", articleId);
+
     Article article = articleRepository.findById(articleId)
         .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND,
             Map.of("articleId", articleId, "detail", "Article not found")));
 
+    commentRepository.findByArticleId(articleId)
+        .forEach(Comment::delete);
+
     article.markDeleted();
+    log.info("📝 기사 삭제 처리 완료: {}", articleId);
   }
 
   @Override

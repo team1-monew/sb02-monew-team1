@@ -4,6 +4,7 @@ import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.article.dto.ArticleViewDto;
 import com.team1.monew.article.service.ArticleService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/articles")
 @RequiredArgsConstructor
+@Slf4j
 public class ArticleController {
 
   private final ArticleService articleService;
@@ -69,7 +71,11 @@ public class ArticleController {
   public ResponseEntity<Void> deleteArticle(
       @PathVariable Long articleId) {
 
+    log.info("📝 기사 삭제 요청: articleId = {}", articleId);
+
     articleService.deleteArticle(articleId);
+
+    log.info("📝 기사 삭제 요청 완료: articleId = {}", articleId);
 
     return ResponseEntity.noContent().build();
   }
