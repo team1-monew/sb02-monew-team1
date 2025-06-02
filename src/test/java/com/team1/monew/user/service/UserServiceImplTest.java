@@ -109,15 +109,4 @@ class UserServiceImplTest {
     assertThat(result).isEqualTo(userDto);
     verify(userMapper).toDto(any(User.class));
   }
-
-  @Test
-  @DisplayName("중복 이메일 검증 시 예외 반환")
-  void validateEmailNotDuplicated() {
-    // given
-    given(userRepository.existsByEmail(userRegisterRequest.email())).willReturn(true);
-
-    // when & then
-    assertThrows(RestException.class, () ->
-        userService.validateEmailNotDuplicated(userRegisterRequest.email()));
-  }
 }

@@ -57,8 +57,7 @@ public class UserServiceImpl implements UserService {
     return userMapper.toDto(user);
   }
 
-  @Override
-  public void validateEmailNotDuplicated(String email) {
+  private void validateEmailNotDuplicated(String email) {
     if (userRepository.existsByEmail(email)) {
       throw new RestException(ErrorCode.CONFLICT);
     }
