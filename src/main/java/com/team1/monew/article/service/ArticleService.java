@@ -2,7 +2,9 @@ package com.team1.monew.article.service;
 
 import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.article.dto.ArticleViewDto;
-import java.time.Instant;
+import com.team1.monew.interest.entity.Interest;
+import com.team1.monew.interest.entity.Keyword;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ArticleService {
@@ -13,21 +15,25 @@ public interface ArticleService {
       String keyword,
       String interestId,
       List<String> sourceIn,
-      Instant publishDateFrom,
-      Instant publishDateTo,
+      LocalDateTime publishDateFrom,
+      LocalDateTime publishDateTo,
       String orderBy,
       String direction,
       String cursor,
-      Instant after,
+      LocalDateTime after,
       int limit,
       String requestUserId
   );
 
   List<String> getSources();
 
-  void restoreArticles(Instant from, Instant to);
+  void restoreArticles(LocalDateTime from, LocalDateTime to);
 
   void deleteArticle(String articleId);
 
   void hardDeleteArticle(String articleId);
+
+  void collectAndSaveNaverArticles(Interest interest, Keyword keyword);
+
+  void collectAndSaveChosunArticles(Interest interest, Keyword keyword);
 }
