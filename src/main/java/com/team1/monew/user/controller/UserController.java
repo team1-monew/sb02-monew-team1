@@ -71,4 +71,15 @@ public class UserController {
         .status(HttpStatus.NO_CONTENT)
         .build();
   }
+
+  @DeleteMapping("/{userId}/hard")
+  public ResponseEntity<Void> deleteHard(
+      @PathVariable Long userId
+  ) {
+    log.info("사용자 물리 삭제 요청: id={}", userId);
+    userService.deleteUser(userId);
+    return ResponseEntity
+        .status(HttpStatus.NO_CONTENT)
+        .build();
+  }
 }

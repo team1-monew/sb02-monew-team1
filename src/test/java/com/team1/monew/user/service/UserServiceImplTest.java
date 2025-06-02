@@ -154,4 +154,17 @@ class UserServiceImplTest {
     // then
     verify(deletedUser).setDeleted();
   }
+
+  @Test
+  @DisplayName("deleteUserHard() 성공")
+  void deleteUserHard() {
+    // given
+    given(userRepository.existsById(any(Long.class))).willReturn(true);
+
+    // when
+    userService.deleteUserHard(1L);
+
+    // then
+    verify(userRepository).deleteById(any(Long.class));
+  }
 }

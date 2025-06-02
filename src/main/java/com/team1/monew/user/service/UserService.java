@@ -10,4 +10,5 @@ public interface UserService {
   UserDto login(UserLoginRequest userLoginRequest);
   UserDto updateUser(Long id, UserUpdateRequest userUpdateRequest);
   void deleteUser(Long id);
+  void deleteUserHard(Long id);
 }

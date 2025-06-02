@@ -201,7 +201,7 @@ class UserApiIntegrationTest {
   }
 
   @Test
-  @DisplayName("사용자 논리삭제 API 통합테스트")
+  @DisplayName("사용자 논리 삭제 API 통합테스트")
   void deleteUser_success() throws Exception {
     // given
     // 사용자 생성
@@ -216,6 +216,25 @@ class UserApiIntegrationTest {
 
     // when & then
     mockMvc.perform(delete("/api/users/{userId}", userId))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  @DisplayName("사용자 물리 삭제 API 통합테스트")
+  void deleteUserHard_success() throws Exception {
+    // given
+    // 사용자 생성
+    UserRegisterRequest userRegisterRequest = UserRegisterRequest.builder()
+        .email("deleteUserHard_success@email.com")
+        .nickname("nickname")
+        .password("password")
+        .build();
+
+    UserDto createdUser = userService.createUser(userRegisterRequest);
+    Long userId = createdUser.id();
+
+    // when & then
+    mockMvc.perform(delete("/api/users/{userId}/hard", userId))
         .andExpect(status().isNoContent());
   }
 }

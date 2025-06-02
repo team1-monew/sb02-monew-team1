@@ -80,7 +80,16 @@ public class UserServiceImpl implements UserService {
         () -> new RestException(ErrorCode.NOT_FOUND, Map.of("id", id))
     );
     user.setDeleted();
-    log.info("사용자 논리 삭제 완료");
+    log.info("사용자 논리 삭제 완료: id={}", id);
+  }
+
+  @Override
+  public void deleteUserHard(Long id) {
+    if (!userRepository.existsById(id)) {
+      throw new RestException(ErrorCode.NOT_FOUND, Map.of("id", id));
+    }
+    userRepository.deleteById(id);
+    log.info("사용자 물리 삭제 완료: id={}", id);
   }
 
   private void validateEmailNotDuplicated(String email) {
