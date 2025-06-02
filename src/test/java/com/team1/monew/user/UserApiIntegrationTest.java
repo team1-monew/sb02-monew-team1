@@ -1,12 +1,16 @@
 package com.team1.monew.user;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team1.monew.user.dto.UserDto;
 import com.team1.monew.user.dto.UserLoginRequest;
 import com.team1.monew.user.dto.UserRegisterRequest;
+import com.team1.monew.user.dto.UserUpdateRequest;
 import com.team1.monew.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +37,7 @@ class UserApiIntegrationTest {
   private UserService userService;
 
   @Test
-  @DisplayName("회원 가입 성공")
+  @DisplayName("회원 가입 API 통합테스트")
   void create_success() throws Exception {
     // given
     UserRegisterRequest userRegisterRequest = UserRegisterRequest.builder()
@@ -54,7 +58,7 @@ class UserApiIntegrationTest {
   }
 
   @Test
-  @DisplayName("중복 이메일로 회원가입 실패")
+  @DisplayName("회원 가입 API 통합테스트 - 중복 이메일로 회원가입 실패")
   void createUser_duplicate_email() throws Exception {
     // given: 첫 번째 사용자 생성
     UserRegisterRequest userRegisterRequest1 = new UserRegisterRequest(
@@ -82,7 +86,7 @@ class UserApiIntegrationTest {
   }
 
   @Test
-  @DisplayName("로그인 성공")
+  @DisplayName("로그인 API 통합테스트")
   void login_success() throws Exception {
     // given
     // 사용자 생성
@@ -112,7 +116,7 @@ class UserApiIntegrationTest {
   }
 
   @Test
-  @DisplayName("로그인 실패 - 존재하지 않는 이메일")
+  @DisplayName("로그인 API 통합테스트 - 존재하지 않는 이메일")
   void login_email_not_found() throws Exception {
     // given
     // 사용자 생성
@@ -139,7 +143,7 @@ class UserApiIntegrationTest {
   }
 
   @Test
-  @DisplayName("로그인 실패 - 비밀번호 불일치")
+  @DisplayName("로그인 API 통합테스트 - 비밀번호 불일치")
   void login_incorrect_password() throws Exception {
     // given
     // 사용자 생성
@@ -163,5 +167,74 @@ class UserApiIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(userLoginRequest)))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("사용자 수정 API 통합테스트")
+  void updateUser_success() throws Exception {
+    // given
+    // 사용자 생성
+    UserRegisterRequest userRegisterRequest = UserRegisterRequest.builder()
+        .email("updateUser_success@email.com")
+        .nickname("nickname")
+        .password("password")
+        .build();
+
+    UserDto createdUser = userService.createUser(userRegisterRequest);
+    Long userId = createdUser.id();
+
+
+    // 업데이트 Dto 생성
+    UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder()
+            .nickname("newNickname")
+            .build();
+
+    // when & then
+    mockMvc.perform(patch("/api/users/{userId}", userId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(userUpdateRequest)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").exists())
+        .andExpect(jsonPath("$.email").value("updateUser_success@email.com"))
+        .andExpect(jsonPath("$.nickname").value("newNickname"))
+        .andExpect(jsonPath("$.createdAt").exists());
+  }
+
+  @Test
+  @DisplayName("사용자 논리 삭제 API 통합테스트")
+  void deleteUser_success() throws Exception {
+    // given
+    // 사용자 생성
+    UserRegisterRequest userRegisterRequest = UserRegisterRequest.builder()
+        .email("deleteUser_success@email.com")
+        .nickname("nickname")
+        .password("password")
+        .build();
+
+    UserDto createdUser = userService.createUser(userRegisterRequest);
+    Long userId = createdUser.id();
+
+    // when & then
+    mockMvc.perform(delete("/api/users/{userId}", userId))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  @DisplayName("사용자 물리 삭제 API 통합테스트")
+  void deleteUserHard_success() throws Exception {
+    // given
+    // 사용자 생성
+    UserRegisterRequest userRegisterRequest = UserRegisterRequest.builder()
+        .email("deleteUserHard_success@email.com")
+        .nickname("nickname")
+        .password("password")
+        .build();
+
+    UserDto createdUser = userService.createUser(userRegisterRequest);
+    Long userId = createdUser.id();
+
+    // when & then
+    mockMvc.perform(delete("/api/users/{userId}/hard", userId))
+        .andExpect(status().isNoContent());
   }
 }
