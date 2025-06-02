@@ -2,7 +2,7 @@ package com.team1.monew.article.mapper;
 
 import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.article.entity.Article;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class ArticleMapper {
 
@@ -27,7 +27,7 @@ public class ArticleMapper {
         .title(dto.title())
         .publishDate(dto.publishDate())
         .summary(dto.summary())
-        .createdAt(Instant.now())
+        .createdAt(LocalDateTime.now())
         .build();
   }
 }
