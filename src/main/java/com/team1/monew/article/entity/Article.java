@@ -1,17 +1,20 @@
 package com.team1.monew.article.entity;
 
 import jakarta.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "articles")
 @Builder
 @AllArgsConstructor
@@ -21,6 +24,7 @@ public class Article {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Builder.Default
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ArticleInterest> articleInterests = new ArrayList<>();
 
@@ -34,27 +38,26 @@ public class Article {
     private String title;
 
     @Column(nullable = false)
-    private Instant publishDate;
+    private LocalDateTime publishDate;
 
     @Column(length = 1000)
     private String summary;
 
+    @Builder.Default
     @Column(nullable = false)
     private Long viewCount = 0L;
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean isDeleted = false;
 
+    @CreatedDate
     @Column(nullable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
-    public Article(String source, String sourceUrl, String title, Instant publishDate, String summary) {
-        this.source = source;
-        this.sourceUrl = sourceUrl;
-        this.title = title;
-        this.publishDate = publishDate;
-        this.summary = summary;
-        this.createdAt = Instant.now();
+    public void addArticleInterest(ArticleInterest articleInterest) {
+        articleInterests.add(articleInterest);
+        articleInterest.updateArticle(this);
     }
 
     public void markDeleted() {
