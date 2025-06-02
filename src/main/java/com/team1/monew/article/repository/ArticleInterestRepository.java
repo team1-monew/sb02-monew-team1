@@ -5,4 +5,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface ArticleInterestRepository extends CrudRepository<ArticleInterest, Long> {
 
+  void deleteByArticleId(Long articleId);
 }

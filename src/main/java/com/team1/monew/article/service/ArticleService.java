@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface ArticleService {
 
-  ArticleViewDto recordView(String articleId, String userId);
+  ArticleViewDto recordView(Long articleId, Long userId);
 
   List<ArticleDto> getArticles(
       String keyword,
@@ -29,9 +29,9 @@ public interface ArticleService {
 
   void restoreArticles(LocalDateTime from, LocalDateTime to);
 
-  void deleteArticle(String articleId);
+  void deleteArticle(Long articleId);
 
-  void hardDeleteArticle(String articleId);
+  void hardDeleteArticle(Long articleId);
 
   void collectAndSaveNaverArticles(Interest interest, Keyword keyword);
 
