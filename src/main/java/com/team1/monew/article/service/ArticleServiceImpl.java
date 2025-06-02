@@ -15,6 +15,7 @@ import com.team1.monew.article.repository.ArticleViewRepository;
 import com.team1.monew.comment.Repository.CommentRepository;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
+import com.team1.monew.comment.entity.Comment;
 import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.interest.entity.Keyword;
 import com.team1.monew.user.entity.User;
@@ -43,12 +44,21 @@ public class ArticleServiceImpl implements ArticleService {
 
   @Transactional
   public void collectAndSaveNaverArticles(Interest interest, Keyword keyword) {
+    log.info("📝 네이버 기사 수집 시작: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
+
     List<CollectedArticleDto> collectedArticles = naverNewsCollector.collect(interest, keyword);
+
+    log.info("📝 네이버 기사 수집 완료: 수집된 기사 수 = {}", collectedArticles.size());
+
     saveArticles(collectedArticles, interest);
+
+    log.info("📝 네이버 기사 저장 완료: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
   }
 
   @Transactional
   public void collectAndSaveChosunArticles(Interest interest, Keyword keyword) {
+    log.info("📝 조선일보 기사 수집 시작: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
+
     List<CollectedArticleDto> collectedArticles = chosunNewsCollector.collect(interest, keyword);
 
     String kw = keyword.getKeyword().toLowerCase();
@@ -58,14 +68,23 @@ public class ArticleServiceImpl implements ArticleService {
             || dto.summary().toLowerCase().contains(kw))
         .toList();
 
+    log.info("📝 조선일보 기사 필터링 완료: 필터된 기사 수 = {}", filtered.size());
+
     saveArticles(filtered, interest);
+
+    log.info("📝 조선일보 기사 저장 완료: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
   }
 
   private void saveArticles(List<CollectedArticleDto> collectedArticles, Interest interest) {
-    for (CollectedArticleDto dto : collectedArticles) {
-      if (articleRepository.existsBySourceUrl(dto.sourceUrl())) continue;
+    log.info("📝 기사 저장 시작: 총 기사 수 = {}", collectedArticles.size());
 
-      log.info("📝 Saving article: {} | publishDate: {}", dto.title(), dto.publishDate());
+    for (CollectedArticleDto dto : collectedArticles) {
+      if (articleRepository.existsBySourceUrl(dto.sourceUrl())) {
+        log.warn("⚠️ 이미 저장된 기사: {}", dto.sourceUrl());
+        continue;
+      }
+
+      log.info("📝 저장 중: 기사 제목 = {}, 발행일 = {}", dto.title(), dto.publishDate());
 
       Article article = Article.builder()
           .title(dto.title())
@@ -81,17 +100,21 @@ public class ArticleServiceImpl implements ArticleService {
       article.addArticleInterest(relation);
 
       articleRepository.save(article);
+
+      log.info("📝 기사 저장 완료: {}", dto.title());
     }
+
+    log.info("📝 기사 저장 완료: 총 저장된 기사 수 = {}", collectedArticles.size());
   }
 
   @Override
   @Transactional
-  public ArticleViewDto recordView(String articleId, String userId) {
-    Article article = articleRepository.findById(Long.valueOf(articleId))
+  public ArticleViewDto recordView(Long articleId, Long userId) {
+    Article article = articleRepository.findById(articleId)
         .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND,
             Map.of("articleId", articleId, "detail", "Article not found")));
 
-    User user = userRepository.findById(Long.valueOf(userId))
+    User user = userRepository.findById(userId)
         .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND,
             Map.of("userId", userId, "detail", "User not found")));
 
@@ -156,8 +179,8 @@ public class ArticleServiceImpl implements ArticleService {
 
   @Override
   @Transactional
-  public void deleteArticle(String articleId) {
-    Article article = articleRepository.findById(Long.valueOf(articleId))
+  public void deleteArticle(Long articleId) {
+    Article article = articleRepository.findById(articleId)
         .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND,
             Map.of("articleId", articleId, "detail", "Article not found")));
 
@@ -166,8 +189,8 @@ public class ArticleServiceImpl implements ArticleService {
 
   @Override
   @Transactional
-  public void hardDeleteArticle(String articleId) {
-    Article article = articleRepository.findById(Long.valueOf(articleId))
+  public void hardDeleteArticle(Long articleId) {
+    Article article = articleRepository.findById(articleId)
         .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND,
             Map.of("articleId", articleId, "detail", "Article not found")));
 

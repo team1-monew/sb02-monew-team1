@@ -19,8 +19,8 @@ public class ArticleController {
 
   @PostMapping("/{articleId}/article-views")
   public ResponseEntity<ArticleViewDto> recordArticleView(
-      @PathVariable String articleId,
-      @RequestParam String userId) {
+      @PathVariable Long articleId,
+      @RequestParam Long userId) {
 
     ArticleViewDto articleViewDto = articleService.recordView(articleId, userId);
 
@@ -67,7 +67,7 @@ public class ArticleController {
 
   @DeleteMapping("/{articleId}")
   public ResponseEntity<Void> deleteArticle(
-      @PathVariable String articleId) {
+      @PathVariable Long articleId) {
 
     articleService.deleteArticle(articleId);
 
@@ -76,7 +76,7 @@ public class ArticleController {
 
   @DeleteMapping("/{articleId}/hard")
   public ResponseEntity<Void> hardDeleteArticle(
-      @PathVariable String articleId) {
+      @PathVariable Long articleId) {
 
     articleService.hardDeleteArticle(articleId);
 
