@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -32,12 +32,12 @@ public class ArticleController {
       @RequestParam(required = false) String keyword,
       @RequestParam(required = false) String interestId,
       @RequestParam(required = false) List<String> sourceIn,
-      @RequestParam(required = false) Instant publishDateFrom,
-      @RequestParam(required = false) Instant publishDateTo,
+      @RequestParam(required = false) LocalDateTime publishDateFrom,
+      @RequestParam(required = false) LocalDateTime publishDateTo,
       @RequestParam(required = false, defaultValue = "publishDate") String orderBy,
       @RequestParam(required = false, defaultValue = "desc") String direction,
       @RequestParam(required = false) String cursor,
-      @RequestParam(required = false) Instant after,
+      @RequestParam(required = false) LocalDateTime after,
       @RequestParam(required = false, defaultValue = "20") int limit,
       @RequestParam(required = false) String requestUserId) {
 
@@ -57,8 +57,8 @@ public class ArticleController {
 
   @GetMapping("/restore")
   public ResponseEntity<Void> restoreArticles(
-      @RequestParam Instant from,
-      @RequestParam Instant to) {
+      @RequestParam LocalDateTime from,
+      @RequestParam LocalDateTime to) {
 
     articleService.restoreArticles(from, to);
 
