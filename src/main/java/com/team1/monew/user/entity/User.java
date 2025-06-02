@@ -58,4 +58,8 @@ public class User {
             this.nickname = newNickname;
         }
     }
+
+    public void setDeleted() {
+        this.isDeleted = true;
+    }
  }

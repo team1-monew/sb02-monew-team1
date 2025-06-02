@@ -9,4 +9,5 @@ public interface UserService {
   UserDto createUser(UserRegisterRequest userRegisterRequest);
   UserDto login(UserLoginRequest userLoginRequest);
   UserDto updateUser(Long id, UserUpdateRequest userUpdateRequest);
+  void deleteUser(Long id);
 }

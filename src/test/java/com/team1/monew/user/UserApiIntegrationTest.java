@@ -199,4 +199,23 @@ class UserApiIntegrationTest {
         .andExpect(jsonPath("$.nickname").value("newNickname"))
         .andExpect(jsonPath("$.createdAt").exists());
   }
+
+  @Test
+  @DisplayName("사용자 논리삭제 API 통합테스트")
+  void deleteUser_success() throws Exception {
+    // given
+    // 사용자 생성
+    UserRegisterRequest userRegisterRequest = UserRegisterRequest.builder()
+        .email("deleteUser_success@email.com")
+        .nickname("nickname")
+        .password("password")
+        .build();
+
+    UserDto createdUser = userService.createUser(userRegisterRequest);
+    Long userId = createdUser.id();
+
+    // when & then
+    mockMvc.perform(delete("/api/users/{userId}", userId))
+        .andExpect(status().isNoContent());
+  }
 }

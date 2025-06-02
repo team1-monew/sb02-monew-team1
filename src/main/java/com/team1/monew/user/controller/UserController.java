@@ -60,4 +60,15 @@ public class UserController {
         .status(HttpStatus.OK)
         .body(updatedUser);
   }
+
+  @DeleteMapping("/{userId}")
+  public ResponseEntity<Void> delete(
+      @PathVariable Long userId
+  ) {
+    log.info("사용자 논리 삭제 요청: id={}", userId);
+    userService.deleteUser(userId);
+    return ResponseEntity
+        .status(HttpStatus.NO_CONTENT)
+        .build();
+  }
 }

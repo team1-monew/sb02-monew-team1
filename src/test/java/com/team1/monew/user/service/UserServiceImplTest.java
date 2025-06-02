@@ -32,6 +32,9 @@ class UserServiceImplTest {
   @Mock
   UserMapper userMapper;
 
+  @Mock
+  User deletedUser;
+
   @InjectMocks
   UserServiceImpl userService;
 
@@ -137,5 +140,18 @@ class UserServiceImplTest {
     // then
     assertThat(result).isEqualTo(updatedUserDto);
     verify(userMapper).toDto(any(User.class));
+  }
+
+  @Test
+  @DisplayName("deleteUser() 성공")
+  void deleteUser() {
+    // given
+    given(userRepository.findById(any(Long.class))).willReturn(Optional.of(deletedUser));
+
+    // when
+    userService.deleteUser(1L);
+
+    // then
+    verify(deletedUser).setDeleted();
   }
 }

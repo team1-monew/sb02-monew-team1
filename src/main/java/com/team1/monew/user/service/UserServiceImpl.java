@@ -74,6 +74,15 @@ public class UserServiceImpl implements UserService {
     return userMapper.toDto(user);
   }
 
+  @Override
+  public void deleteUser(Long id) {
+    User user = userRepository.findById(id).orElseThrow(
+        () -> new RestException(ErrorCode.NOT_FOUND, Map.of("id", id))
+    );
+    user.setDeleted();
+    log.info("사용자 논리 삭제 완료");
+  }
+
   private void validateEmailNotDuplicated(String email) {
     if (userRepository.existsByEmail(email)) {
       throw new RestException(ErrorCode.CONFLICT);
