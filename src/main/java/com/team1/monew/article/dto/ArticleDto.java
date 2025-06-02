@@ -1,6 +1,6 @@
 package com.team1.monew.article.dto;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import lombok.Builder;
 
 @Builder
@@ -9,7 +9,7 @@ public record ArticleDto(
     String source,
     String sourceUrl,
     String title,
-    Instant publishDate,
+    LocalDateTime publishDate,
     String summary,
     Long commentCount,
     Long viewCount,

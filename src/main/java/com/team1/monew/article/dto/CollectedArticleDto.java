@@ -1,4 +1,4 @@
-package com.team1.monew.article.collector;
+package com.team1.monew.article.dto;
 
 import java.time.LocalDateTime;
 import lombok.Builder;

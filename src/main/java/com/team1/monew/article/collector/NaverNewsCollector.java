@@ -1,11 +1,11 @@
 package com.team1.monew.article.collector;
 
-import com.team1.monew.article.repository.ArticleRepository;
+import com.team1.monew.article.dto.CollectedArticleDto;
+import com.team1.monew.article.mapper.CollectedArticleMapper;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
 import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.interest.entity.Keyword;
-import com.team1.monew.interest.repository.InterestRepository;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -34,9 +34,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class NaverNewsCollector implements NewsCollector {
 
-  private final ArticleRepository articleRepository;
-  private final InterestRepository interestRepository;
-
   @Value("${naver.client-id}")
   private String clientId;
 
@@ -45,6 +42,9 @@ public class NaverNewsCollector implements NewsCollector {
 
   @Value("${naver.news-api-url}")
   private String newsApiUrl;
+
+  @Value("${naver.source-name}")
+  private String sourceName;
 
   @Override
   public List<CollectedArticleDto> collect(Interest interest, Keyword keyword) {
@@ -99,13 +99,11 @@ public class NaverNewsCollector implements NewsCollector {
             publishDate = LocalDateTime.now();
           }
 
-          return CollectedArticleDto.builder()
-              .title(Jsoup.parse(item.getString("title")).text())
-              .summary(Jsoup.parse(item.getString("description")).text())
-              .sourceUrl(item.optString("originallink", item.getString("link")))
-              .source("Naver News")
-              .publishDate(publishDate)
-              .build();
+          String title = Jsoup.parse(item.getString("title")).text();
+          String summary = Jsoup.parse(item.getString("description")).text();
+          String sourceUrl = item.optString("originallink", item.getString("link"));
+
+          return CollectedArticleMapper.toDto(title, summary, sourceUrl, sourceName, publishDate);
         })
         .collect(Collectors.toList());
   }

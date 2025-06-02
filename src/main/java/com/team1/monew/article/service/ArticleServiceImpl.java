@@ -1,7 +1,8 @@
 package com.team1.monew.article.service;
 
-import com.team1.monew.article.collector.CollectedArticleDto;
+import com.team1.monew.article.dto.CollectedArticleDto;
 import com.team1.monew.article.collector.NewsCollector;
+import com.team1.monew.article.collector.ChosunNewsCollector;
 import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.article.dto.ArticleViewDto;
 import com.team1.monew.article.entity.Article;
@@ -38,12 +39,29 @@ public class ArticleServiceImpl implements ArticleService {
   private final UserRepository userRepository;
   private final CommentRepository commentRepository;
   private final NewsCollector naverNewsCollector;
+  private final ChosunNewsCollector chosunNewsCollector;
 
-  @Override
   @Transactional
-  public void collectAndSaveArticles(Interest interest, Keyword keyword) {
+  public void collectAndSaveNaverArticles(Interest interest, Keyword keyword) {
     List<CollectedArticleDto> collectedArticles = naverNewsCollector.collect(interest, keyword);
+    saveArticles(collectedArticles, interest);
+  }
 
+  @Transactional
+  public void collectAndSaveChosunArticles(Interest interest, Keyword keyword) {
+    List<CollectedArticleDto> collectedArticles = chosunNewsCollector.collect(interest, keyword);
+
+    String kw = keyword.getKeyword().toLowerCase();
+
+    List<CollectedArticleDto> filtered = collectedArticles.stream()
+        .filter(dto -> dto.title().toLowerCase().contains(kw)
+            || dto.summary().toLowerCase().contains(kw))
+        .toList();
+
+    saveArticles(filtered, interest);
+  }
+
+  private void saveArticles(List<CollectedArticleDto> collectedArticles, Interest interest) {
     for (CollectedArticleDto dto : collectedArticles) {
       if (articleRepository.existsBySourceUrl(dto.sourceUrl())) continue;
 

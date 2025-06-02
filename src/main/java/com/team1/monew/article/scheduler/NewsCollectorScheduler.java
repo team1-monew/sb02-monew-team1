@@ -1,7 +1,6 @@
-package com.team1.monew.article.collector;
+package com.team1.monew.article.scheduler;
 
 import com.team1.monew.article.service.ArticleService;
-import com.team1.monew.article.service.ArticleServiceImpl;
 import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.interest.entity.Keyword;
 import com.team1.monew.interest.repository.InterestRepository;
@@ -18,12 +17,23 @@ public class NewsCollectorScheduler {
   private final ArticleService articleService;
 
   @Scheduled(cron = "0 0 0 * * *")
-  public void collectAllNews() {
+  public void collectNaverNews() {
     List<Interest> interests = interestRepository.findAllWithKeywords();
 
     for (Interest interest : interests) {
       for (Keyword keyword : interest.getKeywords()) {
-        articleService.collectAndSaveArticles(interest, keyword);
+        articleService.collectAndSaveNaverArticles(interest, keyword);
+      }
+    }
+  }
+
+  @Scheduled(cron = "0 10 0 * * *")
+  public void collectChosunNews() {
+    List<Interest> interests = interestRepository.findAllWithKeywords();
+
+    for (Interest interest : interests) {
+      for (Keyword keyword : interest.getKeywords()) {
+        articleService.collectAndSaveChosunArticles(interest, keyword);
       }
     }
   }

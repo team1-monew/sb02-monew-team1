@@ -33,5 +33,7 @@ public interface ArticleService {
 
   void hardDeleteArticle(String articleId);
 
-  void collectAndSaveArticles(Interest interest, Keyword keyword);
+  void collectAndSaveNaverArticles(Interest interest, Keyword keyword);
+
+  void collectAndSaveChosunArticles(Interest interest, Keyword keyword);
 }
