@@ -3,11 +3,15 @@ package com.team1.monew.user.controller;
 import com.team1.monew.user.dto.UserDto;
 import com.team1.monew.user.dto.UserLoginRequest;
 import com.team1.monew.user.dto.UserRegisterRequest;
+import com.team1.monew.user.dto.UserUpdateRequest;
 import com.team1.monew.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,5 +46,18 @@ public class UserController {
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(createdUser);
+  }
+
+  @PatchMapping("/{userdId}")
+  public ResponseEntity<UserDto> update(
+      @PathVariable Long userdId,
+      @RequestBody UserUpdateRequest userUpdateRequest
+  ) {
+    log.info("사용자 수정 요청: id={}, request={}", userdId, userUpdateRequest);
+    UserDto updatedUser = userService.updateUser(userdId, userUpdateRequest);
+    log.debug("사용자 수정 응답: {}", updatedUser);
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(updatedUser);
   }
 }

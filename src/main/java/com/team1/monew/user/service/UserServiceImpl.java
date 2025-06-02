@@ -5,6 +5,7 @@ import com.team1.monew.exception.RestException;
 import com.team1.monew.user.dto.UserDto;
 import com.team1.monew.user.dto.UserLoginRequest;
 import com.team1.monew.user.dto.UserRegisterRequest;
+import com.team1.monew.user.dto.UserUpdateRequest;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.mapper.UserMapper;
 import com.team1.monew.user.repository.UserRepository;
@@ -54,6 +55,22 @@ public class UserServiceImpl implements UserService {
     }
 
     log.info("로그인 성공: email={}", user.getEmail());
+    return userMapper.toDto(user);
+  }
+
+  @Override
+  public UserDto updateUser(Long id, UserUpdateRequest userUpdateRequest) {
+    log.debug("사용자 수정 시도: id={}, request={}", id, userUpdateRequest);
+
+    User user = userRepository.findById(id).orElseThrow(
+        () -> new RestException(ErrorCode.NOT_FOUND, Map.of("id", id))
+    );
+
+    String newNickname = userUpdateRequest.nickname();
+
+    user.update(newNickname);
+
+    log.info("사용자 수정 완료: id={}", id);
     return userMapper.toDto(user);
   }
 
