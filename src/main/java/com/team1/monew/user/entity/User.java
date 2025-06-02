@@ -1,5 +1,6 @@
 package com.team1.monew.user.entity;
 
+import com.team1.monew.user.dto.UserUpdateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -50,5 +51,15 @@ public class User {
         this.email = email;
         this.nickname = nickname;
         this.password = password;
+    }
+
+    public void update(String newNickname) {
+        if (newNickname != null) {
+            this.nickname = newNickname;
+        }
+    }
+
+    public void setDeleted() {
+        this.isDeleted = true;
     }
  }

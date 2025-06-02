@@ -10,6 +10,7 @@ import com.team1.monew.exception.RestException;
 import com.team1.monew.user.dto.UserDto;
 import com.team1.monew.user.dto.UserLoginRequest;
 import com.team1.monew.user.dto.UserRegisterRequest;
+import com.team1.monew.user.dto.UserUpdateRequest;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.mapper.UserMapper;
 import com.team1.monew.user.repository.UserRepository;
@@ -31,13 +32,18 @@ class UserServiceImplTest {
   @Mock
   UserMapper userMapper;
 
+  @Mock
+  User deletedUser;
+
   @InjectMocks
   UserServiceImpl userService;
 
   private UserRegisterRequest userRegisterRequest;
   private UserLoginRequest userLoginRequest;
+  private UserUpdateRequest userUpdateRequest;
   private User user;
   private UserDto userDto;
+  private UserDto updatedUserDto;
 
   @BeforeEach
   void setUp() {
@@ -52,6 +58,10 @@ class UserServiceImplTest {
         .password("user1@@@")
         .build();
 
+    userUpdateRequest = UserUpdateRequest.builder()
+        .nickname("updatedUser1")
+        .build();
+
     user = User.builder()
         .email(userRegisterRequest.email())
         .nickname(userRegisterRequest.nickname())
@@ -64,6 +74,13 @@ class UserServiceImplTest {
         .id(user.getId())
         .email(user.getEmail())
         .nickname(user.getNickname())
+        .createdAt(user.getCreatedAt())
+        .build();
+
+    updatedUserDto = UserDto.builder()
+        .id(user.getId())
+        .email(user.getEmail())
+        .nickname(userUpdateRequest.nickname())
         .createdAt(user.getCreatedAt())
         .build();
   }
@@ -108,5 +125,46 @@ class UserServiceImplTest {
     // then
     assertThat(result).isEqualTo(userDto);
     verify(userMapper).toDto(any(User.class));
+  }
+
+  @Test
+  @DisplayName("updateUser() 성공")
+  void updateUser_saveUser_returnUserDto() {
+    // given
+    given(userRepository.findById(any(Long.class))).willReturn(Optional.of(user));
+    given(userMapper.toDto(any(User.class))).willReturn(updatedUserDto);
+
+    // when
+    UserDto result = userService.updateUser(1L, userUpdateRequest);
+
+    // then
+    assertThat(result).isEqualTo(updatedUserDto);
+    verify(userMapper).toDto(any(User.class));
+  }
+
+  @Test
+  @DisplayName("deleteUser() 성공")
+  void deleteUser() {
+    // given
+    given(userRepository.findById(any(Long.class))).willReturn(Optional.of(deletedUser));
+
+    // when
+    userService.deleteUser(1L);
+
+    // then
+    verify(deletedUser).setDeleted();
+  }
+
+  @Test
+  @DisplayName("deleteUserHard() 성공")
+  void deleteUserHard() {
+    // given
+    given(userRepository.existsById(any(Long.class))).willReturn(true);
+
+    // when
+    userService.deleteUserHard(1L);
+
+    // then
+    verify(userRepository).deleteById(any(Long.class));
   }
 }
