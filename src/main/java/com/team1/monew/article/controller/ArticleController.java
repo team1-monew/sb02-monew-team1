@@ -84,7 +84,11 @@ public class ArticleController {
   public ResponseEntity<Void> hardDeleteArticle(
       @PathVariable Long articleId) {
 
+    log.info("📝 기사 물리 삭제 요청: articleId = {}", articleId);
+
     articleService.hardDeleteArticle(articleId);
+
+    log.info("📝 기사 물리 삭제 요청 완료: articleId = {}", articleId);
 
     return ResponseEntity.noContent().build();
   }

@@ -10,6 +10,7 @@ import com.team1.monew.article.entity.ArticleInterest;
 import com.team1.monew.article.entity.ArticleView;
 import com.team1.monew.article.mapper.ArticleMapper;
 import com.team1.monew.article.mapper.ArticleViewMapper;
+import com.team1.monew.article.repository.ArticleInterestRepository;
 import com.team1.monew.article.repository.ArticleRepository;
 import com.team1.monew.article.repository.ArticleViewRepository;
 import com.team1.monew.comment.Repository.CommentRepository;
@@ -37,6 +38,7 @@ public class ArticleServiceImpl implements ArticleService {
 
   private final ArticleRepository articleRepository;
   private final ArticleViewRepository articleViewRepository;
+  private final ArticleInterestRepository articleInterestRepository;
   private final UserRepository userRepository;
   private final CommentRepository commentRepository;
   private final NewsCollector naverNewsCollector;
@@ -196,10 +198,17 @@ public class ArticleServiceImpl implements ArticleService {
   @Override
   @Transactional
   public void hardDeleteArticle(Long articleId) {
+    log.info("📝 기사 물리 삭제 시작: articleId = {}", articleId);
+
     Article article = articleRepository.findById(articleId)
         .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND,
             Map.of("articleId", articleId, "detail", "Article not found")));
 
+    commentRepository.deleteByArticleId(articleId);
+    articleViewRepository.deleteByArticleId(articleId);
+    articleInterestRepository.deleteByArticleId(articleId);
+
     articleRepository.delete(article);
+    log.info("📝 기사 물리 삭제 완료: articleId = {}", articleId);
   }
 }
