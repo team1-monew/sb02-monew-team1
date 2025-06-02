@@ -4,6 +4,7 @@ import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.article.dto.ArticleViewDto;
 import com.team1.monew.article.service.ArticleService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,14 +14,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/articles")
 @RequiredArgsConstructor
+@Slf4j
 public class ArticleController {
 
   private final ArticleService articleService;
 
   @PostMapping("/{articleId}/article-views")
   public ResponseEntity<ArticleViewDto> recordArticleView(
-      @PathVariable String articleId,
-      @RequestParam String userId) {
+      @PathVariable Long articleId,
+      @RequestParam Long userId) {
 
     ArticleViewDto articleViewDto = articleService.recordView(articleId, userId);
 
@@ -67,18 +69,26 @@ public class ArticleController {
 
   @DeleteMapping("/{articleId}")
   public ResponseEntity<Void> deleteArticle(
-      @PathVariable String articleId) {
+      @PathVariable Long articleId) {
+
+    log.info("📝 기사 삭제 요청: articleId = {}", articleId);
 
     articleService.deleteArticle(articleId);
+
+    log.info("📝 기사 삭제 요청 완료: articleId = {}", articleId);
 
     return ResponseEntity.noContent().build();
   }
 
   @DeleteMapping("/{articleId}/hard")
   public ResponseEntity<Void> hardDeleteArticle(
-      @PathVariable String articleId) {
+      @PathVariable Long articleId) {
+
+    log.info("📝 기사 물리 삭제 요청: articleId = {}", articleId);
 
     articleService.hardDeleteArticle(articleId);
+
+    log.info("📝 기사 물리 삭제 요청 완료: articleId = {}", articleId);
 
     return ResponseEntity.noContent().build();
   }

@@ -6,4 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface ArticleViewRepository extends JpaRepository<ArticleView, Long> {
 
+  void deleteByArticleId(Long articleId);
 }
