@@ -12,6 +12,7 @@ public class InterestMapper {
         .id(interest.getId())
         .name(interest.getName())
         .keywords(interest.getKeywords().stream().map(Keyword::getKeyword).toList())
+        .createdAt(interest.getCreatedAt())
         .subscriberCount(interest.getSubscriberCount())
         .subscribedByMe(true) // 추후 subscription 관련 기능 만들고 수정
         .build();

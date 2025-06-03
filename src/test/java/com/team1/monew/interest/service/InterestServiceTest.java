@@ -3,6 +3,7 @@ package com.team1.monew.interest.service;
 import com.team1.monew.exception.RestException;
 import com.team1.monew.interest.dto.InterestDto;
 import com.team1.monew.interest.dto.InterestRegisterRequest;
+import com.team1.monew.interest.dto.InterestSearchCondition;
 import com.team1.monew.interest.dto.InterestUpdateRequest;
 import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.interest.entity.Keyword;
@@ -18,6 +19,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.mockito.BDDMockito.*;
@@ -105,7 +108,7 @@ public class InterestServiceTest {
     interest.addKeyword(new Keyword("키워드"));
     InterestUpdateRequest interestUpdateRequest = new InterestUpdateRequest(List.of("수정", "테스트"));
 
-    given(interestRepository.findByIdFetch(any(Long.class))).willReturn(Optional.of(interest));
+    given(interestRepository.findById(any(Long.class))).willReturn(Optional.of(interest));
     given(interestRepository.save(any(Interest.class))).willReturn(interest);
 
     // when
@@ -114,7 +117,7 @@ public class InterestServiceTest {
     // then
     assertThat(interestDto.keywords())
         .containsExactlyInAnyOrderElementsOf(interestUpdateRequest.keywords());
-    then(interestRepository).should(times(1)).findByIdFetch(any(Long.class));
+    then(interestRepository).should(times(1)).findById(any(Long.class));
     then(interestRepository).should(times(1)).save(any(Interest.class));
   }
 
@@ -123,7 +126,7 @@ public class InterestServiceTest {
   void updateInterest_notFoundInterest_failed() {
     // given
     InterestUpdateRequest interestUpdateRequest = new InterestUpdateRequest(List.of("수정", "테스트"));
-    given(interestRepository.findByIdFetch(any(Long.class))).willReturn(Optional.empty());
+    given(interestRepository.findById(any(Long.class))).willReturn(Optional.empty());
 
     // when + then
     assertThatThrownBy(() -> interestService.update(1L,interestUpdateRequest))
@@ -138,7 +141,7 @@ public class InterestServiceTest {
     // given
     Interest interest = new Interest("테스트용");
     ReflectionTestUtils.setField(interest, "id",1L);
-    given(interestRepository.findByIdFetch(any(Long.class))).willReturn(Optional.of(interest));
+    given(interestRepository.findById(any(Long.class))).willReturn(Optional.of(interest));
 
     // when
     interestService.delete(1L);
@@ -151,7 +154,7 @@ public class InterestServiceTest {
   @DisplayName("관심사가 존재하지 않을 때, 관심사 삭제 실패")
   void deleteInterest_notFoundInterest_failed() {
     // given
-    given(interestRepository.findByIdFetch(any(Long.class))).willReturn(Optional.empty());
+    given(interestRepository.findById(any(Long.class))).willReturn(Optional.empty());
 
     // when + then
     assertThatThrownBy(() -> interestService.delete(1L))
@@ -159,5 +162,19 @@ public class InterestServiceTest {
         .hasMessageContaining("찾을 수 없습니다.");
 
     then(interestRepository).should(never()).deleteById(any(Long.class));
+  }
+
+  @Test
+  @DisplayName("관심사 조회 성공")
+  void findInterests_success() {
+    // given
+    Slice<Interest> interests = new SliceImpl<>(List.of(new Interest("테스트")));
+    given(interestRepository.searchByCondition(any())).willReturn(interests);
+
+    // when
+    interestService.findInterestsWithCursor(mock(InterestSearchCondition.class));
+
+    // then
+    then(interestRepository).should(times(1)).searchByCondition(any());
   }
 }

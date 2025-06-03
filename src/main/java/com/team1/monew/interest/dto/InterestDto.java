@@ -1,5 +1,6 @@
 package com.team1.monew.interest.dto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;
 
@@ -9,7 +10,8 @@ public record InterestDto(
     String name,
     List<String> keywords,
     Long subscriberCount,
-    boolean subscribedByMe
+    boolean subscribedByMe,
+    LocalDateTime createdAt
 ) {
 
 }
