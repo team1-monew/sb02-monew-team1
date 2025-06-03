@@ -1,8 +1,10 @@
 package com.team1.monew.comment.controller;
 
 import com.team1.monew.comment.dto.CommentDto;
+import com.team1.monew.comment.dto.CommentLikeDto;
 import com.team1.monew.comment.dto.CommentRegisterRequest;
 import com.team1.monew.comment.dto.CommentUpdateRequest;
+import com.team1.monew.comment.service.CommentLikeService;
 import com.team1.monew.comment.service.CommentService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CommentController {
 
     private final CommentService commentService;
+    private final CommentLikeService commentLikeService;
 
     @PostMapping
     public ResponseEntity<CommentDto> create(@RequestBody @Valid CommentRegisterRequest request) {
@@ -78,5 +81,31 @@ public class CommentController {
         return ResponseEntity
             .noContent()
             .build();
+    }
+
+    @PostMapping("/{commentId}/comment-likes")
+    public ResponseEntity<CommentLikeDto> like(@PathVariable Long commentId, @RequestHeader("Monew-Request-User-ID") Long userId) {
+        log.info("POST /api/comments/{}/comment-likes 요청 수신 - commentId: {}, userId: {}", commentId, userId);
+
+        CommentLikeDto commentLikeDto = commentLikeService.like(commentId, userId);
+
+        log.info("댓글 좋아요 요청 성공 - commentId: {}, userId: {}", commentId, userId);
+
+        return ResponseEntity
+                .ok()
+                .body(commentLikeDto);
+    }
+
+    @DeleteMapping("/{commentId}/comment-likes")
+    public ResponseEntity<Void> unlike(@PathVariable Long commentId, @RequestHeader("Monew-Request-User-ID") Long userId) {
+        log.info("DELETE /api/comments/{}/comment-likes 요청 수신 - commentId: {}, userId: {}", commentId, userId);
+
+        commentLikeService.unlike(commentId, userId);
+
+        log.info("댓글 좋아요 취소 요청 성공 - commentId: {}, userId: {}", commentId, userId);
+
+        return ResponseEntity
+                .ok()
+                .build();
     }
 }
