@@ -4,19 +4,24 @@ import com.team1.monew.article.entity.Article;
 import com.team1.monew.article.repository.ArticleRepository;
 import com.team1.monew.comment.dto.CommentDto;
 import com.team1.monew.comment.dto.CommentRegisterRequest;
+import com.team1.monew.comment.dto.CommentSearchCondition;
 import com.team1.monew.comment.dto.CommentUpdateRequest;
 import com.team1.monew.comment.entity.Comment;
 import com.team1.monew.comment.mapper.CommentMapper;
+import com.team1.monew.comment.mapper.PageResponseMapper;
 import com.team1.monew.comment.repository.CommentLikeRepository;
 import com.team1.monew.comment.repository.CommentRepository;
+import com.team1.monew.common.dto.CursorPageResponse;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +35,7 @@ public class CommentServiceImpl implements CommentService {
     private final ArticleRepository articleRepository;
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
+    private final PageResponseMapper pageResponseMapper;
 
 
     @Transactional
@@ -87,7 +93,7 @@ public class CommentServiceImpl implements CommentService {
 
         if (!Objects.equals(comment.getUser().getId(), userId)) {
             log.warn("댓글 수정 권한 없음 - commentId: {}, userId: {}", commentId, userId);
-            throw new RestException(ErrorCode.FORBIDDEN, Map.of(
+            throw new RestException(ErrorCode.ACCESS_DENIED, Map.of(
                 "commentId", commentId,
                 "userId", userId,
                 "detail", "You do not have permission to update this comment"
@@ -121,7 +127,7 @@ public class CommentServiceImpl implements CommentService {
 
         if (!Objects.equals(comment.getUser().getId(), userId)) {
             log.warn("댓글 삭제 권한 없음 - commentId: {}, userId: {}", commentId, userId);
-            throw new RestException(ErrorCode.FORBIDDEN, Map.of(
+            throw new RestException(ErrorCode.ACCESS_DENIED, Map.of(
                 "commentId", commentId,
                 "userId", userId,
                 "detail", "You do not have permission to soft delete this comment"
@@ -150,5 +156,30 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.delete(comment);
 
         log.info("댓글 하드 삭제 완료 - commentId: {}", commentId);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public CursorPageResponse<CommentDto> findCommentsByArticleId(CommentSearchCondition condition) {
+        log.info("댓글 조회 요청 - orderBy: {}, direction: {}, limit: {}, userId: {}",
+            condition.orderBy(), condition.direction(), condition.limit(), condition.userId());
+        Slice<Comment> comments = commentRepository.searchByCondition(condition);
+        log.info("댓글 조회 완료 - numberOfElements: {}, hasNext: {}", comments.getNumberOfElements(), comments.hasNext());
+
+        List<CommentDto> commentDtos = comments.stream()
+            .map(
+                comment -> {
+                    boolean likedByMe = commentLikeRepository.existsByComment_IdAndLikedBy_Id(
+                        comment.getId(),
+                        condition.userId()
+                    );
+                    return commentMapper.toDto(comment, likedByMe);
+                }
+            )
+            .toList();
+
+        log.debug("댓글 DTO 리스트 생성 - size: {}", commentDtos.size());
+
+        return pageResponseMapper.toPageResponse(commentDtos, condition, comments.hasNext());
     }
 }
