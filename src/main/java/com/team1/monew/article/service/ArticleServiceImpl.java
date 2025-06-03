@@ -112,6 +112,8 @@ public class ArticleServiceImpl implements ArticleService {
   @Override
   @Transactional
   public ArticleViewDto recordView(Long articleId, Long userId) {
+    log.info("📝 기사 조회 시작 : articleId = {}, userId = {}", articleId, userId);
+
     Article article = articleRepository.findById(articleId)
         .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND,
             Map.of("articleId", articleId, "detail", "Article not found")));
@@ -120,13 +122,23 @@ public class ArticleServiceImpl implements ArticleService {
         .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND,
             Map.of("userId", userId, "detail", "User not found")));
 
-    ArticleView articleView = new ArticleView(article, user);
-    articleViewRepository.save(articleView);
+    boolean viewExists = articleViewRepository.existsByArticleIdAndViewedById(articleId, userId);
 
-    article.increaseViewCount();
-    articleRepository.save(article);
+    ArticleView articleView = null;
+    if (!viewExists) {
+      articleView = new ArticleView(article, user);
+      articleViewRepository.save(articleView);
+
+      article.increaseViewCount();
+      articleRepository.save(article);
+    } else {
+      articleView = new ArticleView(article, user);
+      articleViewRepository.save(articleView);
+    }
 
     Long commentCount = commentRepository.countByArticleId(article.getId());
+
+    log.info("📝 기사 조회 완료: articleId = {}, userId = {}", articleId, userId);
     return ArticleViewMapper.toDto(articleView, commentCount);
   }
 

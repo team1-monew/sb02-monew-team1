@@ -21,10 +21,14 @@ public class ArticleController {
 
   @PostMapping("/{articleId}/article-views")
   public ResponseEntity<ArticleViewDto> recordArticleView(
-      @PathVariable Long articleId,
-      @RequestParam Long userId) {
+          @PathVariable Long articleId,
+          @RequestParam Long userId) {
+
+    log.info("📝 기사 조회 기록 요청 : articleId = {}, userId = {}", articleId, userId);
 
     ArticleViewDto articleViewDto = articleService.recordView(articleId, userId);
+
+    log.info("📝 기사 조회 기록 요청 완료: articleId = {}, userId = {}", articleId, userId);
 
     return ResponseEntity.ok(articleViewDto);
   }
