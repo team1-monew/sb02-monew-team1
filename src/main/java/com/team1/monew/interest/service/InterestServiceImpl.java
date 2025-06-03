@@ -1,6 +1,5 @@
 package com.team1.monew.interest.service;
 
-import com.team1.monew.common.dto.CursorPageResponse;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
 import com.team1.monew.interest.dto.InterestDto;
@@ -15,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +41,7 @@ public class InterestServiceImpl implements InterestService {
   @Override
   @Transactional
   public InterestDto update(Long id, InterestUpdateRequest interestUpdateRequest) {
-    Interest interest = interestRepository.findByIdFetch(id)
+    Interest interest = interestRepository.findById(id)
         .orElseThrow(() -> {
           log.warn("관심사 수정 실패 - 해당 관심사가 존재하지 않음, id: {}", id);
           return new RestException(ErrorCode.NOT_FOUND, Map.of("id", id));
@@ -57,14 +57,17 @@ public class InterestServiceImpl implements InterestService {
   }
 
   @Override
-  public CursorPageResponse<InterestDto> findAll(InterestSearchCondition interestSearchCondition) {
-    return null;
+  @Transactional
+  public Slice<InterestDto> findInterestsWithCursor(
+      InterestSearchCondition interestSearchCondition) {
+    Slice<Interest> interests = interestRepository.searchByCondition(interestSearchCondition);
+    return interests.map(interestMapper::toDto);
   }
 
   @Override
   @Transactional
   public void delete(Long id) {
-    Interest interest = interestRepository.findByIdFetch(id)
+    Interest interest = interestRepository.findById(id)
         .orElseThrow(() -> {
           log.warn("관심사 삭제 실패 - 해당 관심사가 존재하지 않음, id: {}", id);
           return new RestException(ErrorCode.NOT_FOUND, Map.of("id", id));
