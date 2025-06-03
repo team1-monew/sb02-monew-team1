@@ -1,0 +1,26 @@
+package com.team1.monew.comment.mapper;
+
+import com.team1.monew.comment.dto.CommentLikeDto;
+import com.team1.monew.comment.entity.CommentLike;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Component;
+
+@Component
+@AllArgsConstructor
+public class CommentLikeMapper {
+    public CommentLikeDto toDto(CommentLike commentLike, Long commentLikeCount) {
+
+        return CommentLikeDto.builder()
+            .id(commentLike.getId())
+            .likedBy(commentLike.getLikedBy().getId())
+            .createdAt(commentLike.getCreatedAt())
+            .commentId(commentLike.getComment().getId())
+            .articleId(commentLike.getComment().getArticle().getId())
+            .commentUserId(commentLike.getComment().getUser().getId())
+            .commentUserNickname(commentLike.getComment().getUser().getNickname())
+            .commentContent(commentLike.getComment().getContent())
+            .commentLikeCount(commentLikeCount)
+            .commentCreatedAt(commentLike.getComment().getCreatedAt())
+            .build();
+    }
+}
