@@ -191,6 +191,7 @@ class UserApiIntegrationTest {
 
     // when & then
     mockMvc.perform(patch("/api/users/{userId}", userId)
+            .header("Monew-Request-User-ID", userId.toString())
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(userUpdateRequest)))
         .andExpect(status().isOk())
@@ -215,7 +216,8 @@ class UserApiIntegrationTest {
     Long userId = createdUser.id();
 
     // when & then
-    mockMvc.perform(delete("/api/users/{userId}", userId))
+    mockMvc.perform(delete("/api/users/{userId}", userId)
+            .header("Monew-Request-User-ID", userId.toString()))
         .andExpect(status().isNoContent());
   }
 
@@ -234,7 +236,8 @@ class UserApiIntegrationTest {
     Long userId = createdUser.id();
 
     // when & then
-    mockMvc.perform(delete("/api/users/{userId}/hard", userId))
+    mockMvc.perform(delete("/api/users/{userId}/hard", userId)
+            .header("Monew-Request-User-ID", userId.toString()))
         .andExpect(status().isNoContent());
   }
 }
