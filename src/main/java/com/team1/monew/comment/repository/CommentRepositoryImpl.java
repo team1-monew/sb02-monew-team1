@@ -38,9 +38,21 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                     : comment.createdAt.lt(cursorDateTime));
             } else if (condition.orderBy() == CommentOrderBy.LIKE_COUNT) {
                 Long cursorLike = Long.parseLong(condition.cursor());
-                where.and(condition.direction().isAscending()
-                    ? comment.likeCount.gt(cursorLike)
-                    : comment.likeCount.lt(cursorLike));
+                LocalDateTime after = condition.after();
+
+                if (condition.direction().isAscending()) {
+                    where.and(
+                        comment.likeCount.gt(cursorLike)
+                            .or(comment.likeCount.eq(cursorLike)
+                                .and(comment.createdAt.gt(after)))
+                    );
+                } else {
+                    where.and(
+                        comment.likeCount.lt(cursorLike)
+                            .or(comment.likeCount.eq(cursorLike)
+                                .and(comment.createdAt.lt(after)))
+                    );
+                }
             }
         }
 
