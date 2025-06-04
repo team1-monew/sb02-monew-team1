@@ -1,5 +1,6 @@
-package com.team1.monew.interest.entity;
+package com.team1.monew.subscription.entity;
 
+import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
