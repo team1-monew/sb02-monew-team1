@@ -138,7 +138,7 @@ public class ArticleServiceImpl implements ArticleService {
       articleViewRepository.save(articleView);
     }
 
-    Long commentCount = commentRepository.countByArticleId(article.getId());
+    Long commentCount = commentRepository.countByArticleIdAndIsDeletedFalse(article.getId());
 
     log.info("📝 기사 조회 완료: articleId = {}, userId = {}", articleId, userId);
     return ArticleViewMapper.toDto(articleView, commentCount);
