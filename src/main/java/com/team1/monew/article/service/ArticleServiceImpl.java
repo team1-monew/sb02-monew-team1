@@ -11,7 +11,7 @@ import com.team1.monew.article.repository.ArticleInterestRepository;
 import com.team1.monew.article.repository.ArticleRepository;
 import com.team1.monew.article.repository.ArticleRepositoryCustom;
 import com.team1.monew.article.repository.ArticleViewRepository;
-import com.team1.monew.comment.Repository.CommentRepository;
+import com.team1.monew.comment.repository.CommentRepository;
 import com.team1.monew.common.dto.CursorPageResponse;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;

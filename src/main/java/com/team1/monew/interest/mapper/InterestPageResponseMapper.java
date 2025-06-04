@@ -9,7 +9,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PageResponseMapper {
+public class InterestPageResponseMapper {
   public CursorPageResponse<InterestDto> toPageResponse(
       Slice<InterestDto> interestDtoSlice,
       InterestSearchCondition interestSearchCondition) {
