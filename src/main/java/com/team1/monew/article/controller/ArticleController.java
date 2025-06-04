@@ -98,7 +98,11 @@ public class ArticleController {
 
   @GetMapping("/sources")
   public ResponseEntity<List<String>> getSources() {
+    log.info("📝 출처 목록 조회 요청");
+
     List<String> sources = articleService.getSources();
+
+    log.info("📝 출처 목록 조회 요청 완료: sources count = {}", sources.size());
 
     return ResponseEntity.ok(sources);
   }
