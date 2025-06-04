@@ -58,6 +58,28 @@ class UserApiIntegrationTest {
   }
 
   @Test
+  @DisplayName("회원가입 API 통합테스트 - 유효하지 않은 입력값으로 실패")
+  void createUser_invalid_input() throws Exception {
+    // given: 유효하지 않은 이메일과 너무 짧은 비밀번호, 공백 닉네임
+    UserRegisterRequest invalidRequest = new UserRegisterRequest(
+        "invalid-email",     // 이메일 형식 아님
+        "",                  // 닉네임 공백
+        "123"                // 비밀번호 길이 부족
+    );
+
+    // when & then
+    mockMvc.perform(post("/api/users")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(invalidRequest)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("입력값이 유효하지 않습니다."))
+        .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+        .andExpect(jsonPath("$.details.email").exists())
+        .andExpect(jsonPath("$.details.nickname").exists())
+        .andExpect(jsonPath("$.details.password").exists());
+  }
+
+  @Test
   @DisplayName("회원 가입 API 통합테스트 - 중복 이메일로 회원가입 실패")
   void createUser_duplicate_email() throws Exception {
     // given: 첫 번째 사용자 생성
@@ -82,7 +104,9 @@ class UserApiIntegrationTest {
     mockMvc.perform(post("/api/users")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(userRegisterRequest2)))
-        .andExpect(status().isConflict());
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.code").value("CONFLICT"))
+        .andExpect(jsonPath("$.message").value("이미 존재하는 리소스입니다."));
   }
 
   @Test
@@ -135,11 +159,13 @@ class UserApiIntegrationTest {
         .build();
 
     // when & then
-    // then: 404 NOT_FOUND 기대
+    // then: 401 UNAUTHORIZED 기대
     mockMvc.perform(post("/api/users/login")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(userLoginRequest)))
-        .andExpect(status().isNotFound());
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"))
+        .andExpect(jsonPath("$.message").value("이메일 또는 비밀번호가 올바르지 않습니다."));
   }
 
   @Test
@@ -162,11 +188,13 @@ class UserApiIntegrationTest {
         .build();
 
     // when & then
-    // then: 404 NOT_FOUND 기대
+    // then: 401 UNAUTHORIZED 기대
     mockMvc.perform(post("/api/users/login")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(userLoginRequest)))
-        .andExpect(status().isNotFound());
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"))
+        .andExpect(jsonPath("$.message").value("이메일 또는 비밀번호가 올바르지 않습니다."));
   }
 
   @Test
@@ -191,6 +219,7 @@ class UserApiIntegrationTest {
 
     // when & then
     mockMvc.perform(patch("/api/users/{userId}", userId)
+            .header("Monew-Request-User-ID", userId.toString())
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(userUpdateRequest)))
         .andExpect(status().isOk())
@@ -215,7 +244,8 @@ class UserApiIntegrationTest {
     Long userId = createdUser.id();
 
     // when & then
-    mockMvc.perform(delete("/api/users/{userId}", userId))
+    mockMvc.perform(delete("/api/users/{userId}", userId)
+            .header("Monew-Request-User-ID", userId.toString()))
         .andExpect(status().isNoContent());
   }
 
@@ -234,7 +264,8 @@ class UserApiIntegrationTest {
     Long userId = createdUser.id();
 
     // when & then
-    mockMvc.perform(delete("/api/users/{userId}/hard", userId))
+    mockMvc.perform(delete("/api/users/{userId}/hard", userId)
+            .header("Monew-Request-User-ID", userId.toString()))
         .andExpect(status().isNoContent());
   }
 }
