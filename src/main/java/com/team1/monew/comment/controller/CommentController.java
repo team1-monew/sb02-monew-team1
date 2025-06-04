@@ -3,20 +3,25 @@ package com.team1.monew.comment.controller;
 import com.team1.monew.comment.dto.CommentDto;
 import com.team1.monew.comment.dto.CommentLikeDto;
 import com.team1.monew.comment.dto.CommentRegisterRequest;
+import com.team1.monew.comment.dto.CommentSearchCondition;
 import com.team1.monew.comment.dto.CommentUpdateRequest;
 import com.team1.monew.comment.service.CommentLikeService;
 import com.team1.monew.comment.service.CommentService;
+import com.team1.monew.common.dto.CursorPageResponse;
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -107,5 +112,29 @@ public class CommentController {
         return ResponseEntity
                 .ok()
                 .build();
+    }
+
+    @GetMapping
+    public ResponseEntity<CursorPageResponse<CommentDto>> findCommentsByArticleId(
+            @RequestParam Long articleId,
+            @RequestParam String orderBy,
+            @RequestParam String direction,
+            @RequestParam(required = false) String cursor,
+            @RequestParam(required = false) LocalDateTime after,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestHeader("Monew-Request-User-ID") Long userId
+        ) {
+        log.debug("GET /api/comments 요청 수신 - articleId: {}, userId: {}", articleId, userId);
+
+        CommentSearchCondition condition = CommentSearchCondition.fromParams(
+            articleId, orderBy, direction, cursor, after, limit, userId
+        );
+
+        CursorPageResponse<CommentDto> comments = commentService.findCommentsByArticleId(condition);
+
+        log.debug("댓글 조회 요청 성공 - nextCursor: {}, hasNext: {}", comments.nextCursor(), comments.hasNext());
+
+        return ResponseEntity
+                .ok(comments);
     }
 }
