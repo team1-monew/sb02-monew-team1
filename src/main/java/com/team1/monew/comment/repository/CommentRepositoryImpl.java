@@ -44,7 +44,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                     where.and(
                         comment.likeCount.gt(cursorLike)
                             .or(comment.likeCount.eq(cursorLike)
-                                .and(comment.createdAt.gt(after)))
+                                .and(comment.createdAt.lt(after)))
                     );
                 } else {
                     where.and(
@@ -57,20 +57,21 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
         }
 
         // 정렬 조건
-        OrderSpecifier<?> orderSpecifier = switch (condition.orderBy()) {
-            case CREATED_AT -> condition.direction().isAscending()
-                ? comment.createdAt.asc()
-                : comment.createdAt.desc();
-            case LIKE_COUNT -> condition.direction().isAscending()
-                ? comment.likeCount.asc()
-                : comment.likeCount.desc();
+        OrderSpecifier<?>[] orderSpecifiers = switch (condition.orderBy()) {
+            case CREATED_AT -> new OrderSpecifier<?>[] {
+                condition.direction().isAscending() ? comment.createdAt.asc() : comment.createdAt.desc()
+            };
+            case LIKE_COUNT -> new OrderSpecifier<?>[] {
+                condition.direction().isAscending() ? comment.likeCount.asc() : comment.likeCount.desc(),
+                comment.createdAt.desc()
+            };
         };
 
         int limit = condition.limit() + 1;
         List<Comment> result = queryFactory
             .selectFrom(comment)
             .where(where)
-            .orderBy(orderSpecifier)
+            .orderBy(orderSpecifiers)
             .limit(limit)
             .fetch();
 

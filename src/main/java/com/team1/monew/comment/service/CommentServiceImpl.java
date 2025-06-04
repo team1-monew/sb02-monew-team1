@@ -161,10 +161,10 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(readOnly = true)
     @Override
     public CursorPageResponse<CommentDto> findCommentsByArticleId(CommentSearchCondition condition) {
-        log.info("댓글 조회 요청 - orderBy: {}, direction: {}, limit: {}, userId: {}",
+        log.debug("댓글 조회 요청 - orderBy: {}, direction: {}, limit: {}, userId: {}",
             condition.orderBy(), condition.direction(), condition.limit(), condition.userId());
         Slice<Comment> comments = commentRepository.searchByCondition(condition);
-        log.info("댓글 조회 완료 - numberOfElements: {}, hasNext: {}", comments.getNumberOfElements(), comments.hasNext());
+        log.debug("댓글 조회 완료 - numberOfElements: {}, hasNext: {}", comments.getNumberOfElements(), comments.hasNext());
 
         List<CommentDto> commentDtos = comments.stream()
             .map(

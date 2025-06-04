@@ -124,7 +124,7 @@ public class CommentController {
             @RequestParam(defaultValue = "10") int limit,
             @RequestHeader("Monew-Request-User-ID") Long userId
         ) {
-        log.info("GET /api/comments 요청 수신 - articleId: {}, userId: {}", articleId, userId);
+        log.debug("GET /api/comments 요청 수신 - articleId: {}, userId: {}", articleId, userId);
 
         CommentSearchCondition condition = CommentSearchCondition.fromParams(
             articleId, orderBy, direction, cursor, after, limit, userId
@@ -132,7 +132,7 @@ public class CommentController {
 
         CursorPageResponse<CommentDto> comments = commentService.findCommentsByArticleId(condition);
 
-        log.info("댓글 조회 요청 성공 - nextCursor: {}, hasNext: {}", comments.nextCursor(), comments.hasNext());
+        log.debug("댓글 조회 요청 성공 - nextCursor: {}, hasNext: {}", comments.nextCursor(), comments.hasNext());
 
         return ResponseEntity
                 .ok(comments);
