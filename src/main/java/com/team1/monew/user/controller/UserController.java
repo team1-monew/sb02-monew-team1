@@ -5,6 +5,7 @@ import com.team1.monew.user.dto.UserLoginRequest;
 import com.team1.monew.user.dto.UserRegisterRequest;
 import com.team1.monew.user.dto.UserUpdateRequest;
 import com.team1.monew.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ public class UserController {
 
   @PostMapping
   public ResponseEntity<UserDto> create(
-      @RequestBody UserRegisterRequest userRegisterRequest
+      @RequestBody @Valid UserRegisterRequest userRegisterRequest
   ) {
     log.info("회원가입 요청: email={}, nickname={}", userRegisterRequest.email(), userRegisterRequest.nickname());
     UserDto createdUser = userService.createUser(userRegisterRequest);
@@ -38,7 +39,7 @@ public class UserController {
 
   @PostMapping("/login")
   public ResponseEntity<UserDto> login(
-      @RequestBody UserLoginRequest userLoginRequest
+      @RequestBody @Valid UserLoginRequest userLoginRequest
   ) {
     log.info("로그인 요청: email={}", userLoginRequest.email());
     UserDto createdUser = userService.login(userLoginRequest);
@@ -51,7 +52,7 @@ public class UserController {
   @PatchMapping("/{userdId}")
   public ResponseEntity<UserDto> update(
       @PathVariable Long userdId,
-      @RequestBody UserUpdateRequest userUpdateRequest
+      @RequestBody @Valid UserUpdateRequest userUpdateRequest
   ) {
     log.info("사용자 수정 요청: id={}, request={}", userdId, userUpdateRequest);
     UserDto updatedUser = userService.updateUser(userdId, userUpdateRequest);

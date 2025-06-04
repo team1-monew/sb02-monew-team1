@@ -1,7 +1,16 @@
 package com.team1.monew.user.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public record UserLoginRequest(
+    @NotBlank
+    @Email
     String email,
+
+    @NotBlank
+    @Size(min = 6, max = 20)
     String password
 ) {
   public static class Builder {

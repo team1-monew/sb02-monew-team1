@@ -1,15 +1,24 @@
 package com.team1.monew.exception;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 public record ErrorResponse(
-    Instant timestamp,
+    LocalDateTime timestamp,
     int status,
     String message,
-    Map<String, Object> details
+    Map<String, Object> details,
+    String exceptionType,
+    String code
 ) {
-  public ErrorResponse(Code code, Map<String, Object> details) {
-    this(Instant.now(), code.getStatus().value(), code.getMessage(), details);
+  public ErrorResponse(RestException e) {
+    this(
+        LocalDateTime.now(),
+        e.getErrorCode().getStatus().value(),
+        e.getMessage(),
+        e.getDetails(),
+        e.getClass().getSimpleName(),
+        e.getErrorCode().name()
+    );
   }
 }
