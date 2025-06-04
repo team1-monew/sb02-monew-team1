@@ -1,6 +1,6 @@
 package com.team1.monew.interest.repository;
 
-import com.team1.monew.interest.config.TestQueryDslConfig;
+import com.team1.monew.config.QueryDslConfig;
 import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.interest.entity.Keyword;
 import jakarta.persistence.EntityManager;
@@ -16,7 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
-@Import(TestQueryDslConfig.class)
+@Import(QueryDslConfig.class)
 @ActiveProfiles("test")
 public class InterestRepositoryTest {
 
