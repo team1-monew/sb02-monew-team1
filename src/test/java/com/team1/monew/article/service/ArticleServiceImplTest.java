@@ -7,7 +7,7 @@ import com.team1.monew.article.dto.ArticleViewDto;
 import com.team1.monew.article.dto.CollectedArticleDto;
 import com.team1.monew.article.entity.*;
 import com.team1.monew.article.repository.*;
-import com.team1.monew.comment.Repository.CommentRepository;
+import com.team1.monew.comment.repository.CommentRepository;
 import com.team1.monew.comment.entity.Comment;
 import com.team1.monew.common.dto.CursorPageResponse;
 import com.team1.monew.exception.ErrorCode;

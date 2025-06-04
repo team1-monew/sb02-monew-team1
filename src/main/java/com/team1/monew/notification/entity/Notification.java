@@ -2,7 +2,7 @@ package com.team1.monew.notification.entity;
 
 import com.team1.monew.user.entity.User;
 import jakarta.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import lombok.Getter;
 
 @Entity
@@ -33,21 +33,21 @@ public class Notification {
     private boolean confirmed = false;
 
     @Column(nullable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private Instant updatedAt;
+    private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        Instant now = Instant.now();
+        LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = Instant.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     protected Notification() {
@@ -59,8 +59,8 @@ public class Notification {
         this.resourceType = resourceType;
         this.resourceId = resourceId;
         this.confirmed = false;
-        this.createdAt = Instant.now();
-        this.updatedAt = Instant.now();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
 
