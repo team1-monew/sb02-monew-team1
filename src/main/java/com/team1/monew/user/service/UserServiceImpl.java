@@ -47,11 +47,11 @@ public class UserServiceImpl implements UserService {
     String password = userLoginRequest.password();
 
     User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND, Map.of("email", email))
+            .orElseThrow(() -> new RestException(ErrorCode.INVALID_CREDENTIALS)
             );
 
     if (!user.getPassword().equals(password)) {
-      throw new RestException(ErrorCode.NOT_FOUND, Map.of("password", "incorrect password"));
+      throw new RestException(ErrorCode.INVALID_CREDENTIALS);
     }
 
     log.info("로그인 성공: email={}", user.getEmail());
