@@ -44,8 +44,9 @@ public class InterestServiceImpl implements InterestService {
   @Transactional
   public InterestDto update(Long id, InterestUpdateRequest interestUpdateRequest) {
     Interest interest = interestRepository.findById(id).orElseThrow(() -> {
-      log.warn("관심사 수정 실패 - 해당 관심사가 존재하지 않음, id: {}, details: {}", id, "interest not found");
-      return new RestException(ErrorCode.NOT_FOUND, Map.of("id", id));
+      log.warn("관심사 수정 실패 - 해당 관심사가 존재하지 않음, id: {}", id);
+      return new RestException(ErrorCode.NOT_FOUND,
+          Map.of("id", id, "detail", "interest not found"));
     });
     List<Keyword> keywords = interestUpdateRequest.keywords().stream().map(Keyword::new).toList();
 
@@ -68,8 +69,9 @@ public class InterestServiceImpl implements InterestService {
   @Transactional
   public void delete(Long id) {
     Interest interest = interestRepository.findById(id).orElseThrow(() -> {
-      log.warn("관심사 삭제 실패 - 해당 관심사가 존재하지 않음, id: {}, details: {}", id, "interest not found");
-      return new RestException(ErrorCode.NOT_FOUND, Map.of("id", id));
+      log.warn("관심사 삭제 실패 - 해당 관심사가 존재하지 않음, id: {}", id);
+      return new RestException(ErrorCode.NOT_FOUND,
+          Map.of("id", id, "detail", "interest not found"));
     });
     interestRepository.deleteById(id);
     log.info("관심사 삭제 완료 - interestId: {}", interest.getId());
@@ -92,7 +94,8 @@ public class InterestServiceImpl implements InterestService {
 
       if (similarity >= 0.8) {
         log.warn("관심사 등록 실패 - 유사도 80% 이상, name: {}, existing: {}", name, existing);
-        throw new RestException(ErrorCode.SIMILARITY_OVER_VIOLATION, Map.of("interestName", name));
+        throw new RestException(ErrorCode.SIMILARITY_OVER_VIOLATION,
+            Map.of("interestName", name, "detail", "interest name similarity over 80"));
       }
     }
   }
