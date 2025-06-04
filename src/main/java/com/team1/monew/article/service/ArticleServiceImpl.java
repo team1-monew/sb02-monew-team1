@@ -5,15 +5,14 @@ import com.team1.monew.article.collector.NewsCollector;
 import com.team1.monew.article.collector.ChosunNewsCollector;
 import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.article.dto.ArticleViewDto;
-import com.team1.monew.article.entity.Article;
-import com.team1.monew.article.entity.ArticleInterest;
-import com.team1.monew.article.entity.ArticleView;
-import com.team1.monew.article.mapper.ArticleMapper;
+import com.team1.monew.article.entity.*;
 import com.team1.monew.article.mapper.ArticleViewMapper;
 import com.team1.monew.article.repository.ArticleInterestRepository;
 import com.team1.monew.article.repository.ArticleRepository;
+import com.team1.monew.article.repository.ArticleRepositoryCustom;
 import com.team1.monew.article.repository.ArticleViewRepository;
 import com.team1.monew.comment.Repository.CommentRepository;
+import com.team1.monew.common.dto.CursorPageResponse;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
 import com.team1.monew.comment.entity.Comment;
@@ -21,14 +20,16 @@ import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.interest.entity.Keyword;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
-import java.util.Map;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 public class ArticleServiceImpl implements ArticleService {
 
   private final ArticleRepository articleRepository;
+  private final ArticleRepositoryCustom articleRepositoryCustom;
   private final ArticleViewRepository articleViewRepository;
   private final ArticleInterestRepository articleInterestRepository;
   private final UserRepository userRepository;
@@ -112,6 +114,8 @@ public class ArticleServiceImpl implements ArticleService {
   @Override
   @Transactional
   public ArticleViewDto recordView(Long articleId, Long userId) {
+    log.info("📝 기사 조회 시작 : articleId = {}, userId = {}", articleId, userId);
+
     Article article = articleRepository.findById(articleId)
         .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND,
             Map.of("articleId", articleId, "detail", "Article not found")));
@@ -120,37 +124,45 @@ public class ArticleServiceImpl implements ArticleService {
         .orElseThrow(() -> new RestException(ErrorCode.NOT_FOUND,
             Map.of("userId", userId, "detail", "User not found")));
 
-    ArticleView articleView = new ArticleView(article, user);
-    articleViewRepository.save(articleView);
+    boolean viewExists = articleViewRepository.existsByArticleIdAndViewedById(articleId, userId);
 
-    article.increaseViewCount();
-    articleRepository.save(article);
+    ArticleView articleView = null;
+    if (!viewExists) {
+      articleView = new ArticleView(article, user);
+      articleViewRepository.save(articleView);
+
+      article.increaseViewCount();
+      articleRepository.save(article);
+    } else {
+      articleView = new ArticleView(article, user);
+      articleViewRepository.save(articleView);
+    }
 
     Long commentCount = commentRepository.countByArticleId(article.getId());
+
+    log.info("📝 기사 조회 완료: articleId = {}, userId = {}", articleId, userId);
     return ArticleViewMapper.toDto(articleView, commentCount);
   }
 
   @Override
-  public List<ArticleDto> getArticles(
-      String keyword,
-      String interestId,
-      List<String> sourceIn,
-      LocalDateTime publishDateFrom,
-      LocalDateTime publishDateTo,
-      String orderBy,
-      String direction,
-      String cursor,
-      LocalDateTime after,
-      int limit,
-      String requestUserId) {
-
-    // TODO: 검색어, 관심사, 출처, 날짜 필터링 및 커서 기반 페이지네이션, 정렬 로직 적용
-    List<Article> articles = articleRepository.findAll();
-
-    return articles.stream()
-        .filter(article -> !article.isDeleted())
-        .map(article -> ArticleMapper.toDto(article, 0L, false))
-        .collect(Collectors.toList());
+  @Transactional(readOnly = true)
+  public CursorPageResponse<ArticleDto> getArticles(
+          String keyword,
+          Long interestId,
+          List<String> sourceIn,
+          LocalDate publishDateFrom,
+          LocalDate publishDateTo,
+          String orderBy,
+          String direction,
+          String cursor,
+          int limit,
+          String after,
+          Long userId
+  ) {
+    return articleRepositoryCustom.searchArticles(
+            keyword, interestId, sourceIn, publishDateFrom, publishDateTo,
+            orderBy, direction, cursor, limit, after, userId
+    );
   }
 
   @Override
