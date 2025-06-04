@@ -2,11 +2,9 @@ package com.team1.monew.comment.mapper;
 
 import com.team1.monew.comment.dto.CommentLikeDto;
 import com.team1.monew.comment.entity.CommentLike;
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@AllArgsConstructor
 public class CommentLikeMapper {
     public CommentLikeDto toDto(CommentLike commentLike, Long commentLikeCount) {
 
