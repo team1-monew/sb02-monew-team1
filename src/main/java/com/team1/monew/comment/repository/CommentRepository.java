@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long>, CommentRepositoryCustom {
 
+    Long countByArticleIdAndIsDeletedFalse(Long articleId);
+
 }
