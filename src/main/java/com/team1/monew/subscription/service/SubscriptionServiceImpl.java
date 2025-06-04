@@ -64,8 +64,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                   "subscription not found"));
         });
     subscriptionRepository.deleteById(subscription.getId());
+
+    Interest interest = subscription.getInterest();
+    // Todo: 동시성 제어 (update atomic 쿼리 vs 낙관적 / 비관적 락)
+    interest.updateSubscriberCount(interest.getSubscriberCount() - 1);
+    
     log.info("관심사 구독 취소 완료 - interestId: {}, userId: {}", interestId, userId);
   }
+
 
   private void checkDuplicateSubscription(Long interestId, Long userId) {
     if (subscriptionRepository.existsByInterest_IdAndUser_Id(interestId, userId)) {
