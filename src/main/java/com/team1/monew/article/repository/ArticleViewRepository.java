@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ArticleViewRepository extends JpaRepository<ArticleView, Long> {
@@ -13,4 +14,6 @@ public interface ArticleViewRepository extends JpaRepository<ArticleView, Long> 
   boolean existsByArticleIdAndViewedById(Long articleId, Long viewedById);
 
   void deleteByArticleId(Long articleId);
+
+  List<ArticleView> findByViewedByIdAndArticleIdIn(Long userId, List<Long> articleIds);
 }
