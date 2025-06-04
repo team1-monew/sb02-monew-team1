@@ -2,7 +2,7 @@ package com.team1.monew.useractivity.entity;
 
 import com.team1.monew.user.entity.User;
 import jakarta.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import lombok.Getter;
 
 @Entity
@@ -25,11 +25,11 @@ public class UserActivity {
     private String description;
 
     @Column(nullable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = Instant.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     protected UserActivity() {
@@ -39,7 +39,7 @@ public class UserActivity {
         this.user = user;
         this.actionType = actionType;
         this.description = description;
-        this.createdAt = Instant.now();
+        this.createdAt = LocalDateTime.now();
     }
 
 }

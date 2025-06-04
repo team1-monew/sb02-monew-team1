@@ -9,7 +9,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PageResponseMapper {
+public class CommentPageResponseMapper {
     public CursorPageResponse<CommentDto> toPageResponse(
         List<CommentDto> content,
         CommentSearchCondition condition,

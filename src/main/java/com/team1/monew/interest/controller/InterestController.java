@@ -5,13 +5,10 @@ import com.team1.monew.interest.dto.InterestDto;
 import com.team1.monew.interest.dto.InterestRegisterRequest;
 import com.team1.monew.interest.dto.InterestSearchCondition;
 import com.team1.monew.interest.dto.InterestUpdateRequest;
-import com.team1.monew.interest.mapper.PageResponseMapper;
+import com.team1.monew.interest.mapper.InterestPageResponseMapper;
 import com.team1.monew.interest.service.InterestService;
 import jakarta.validation.Valid;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Slice;
@@ -35,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class InterestController {
 
   private final InterestService interestService;
-  private final PageResponseMapper pageResponseMapper;
+  private final InterestPageResponseMapper pageResponseMapper;
 
   @PostMapping
   public ResponseEntity<InterestDto> create(
