@@ -8,7 +8,7 @@ import com.team1.monew.comment.dto.CommentSearchCondition;
 import com.team1.monew.comment.dto.CommentUpdateRequest;
 import com.team1.monew.comment.entity.Comment;
 import com.team1.monew.comment.mapper.CommentMapper;
-import com.team1.monew.comment.mapper.PageResponseMapper;
+import com.team1.monew.comment.mapper.CommentPageResponseMapper;
 import com.team1.monew.comment.repository.CommentLikeRepository;
 import com.team1.monew.comment.repository.CommentRepository;
 import com.team1.monew.common.dto.CursorPageResponse;
@@ -35,7 +35,7 @@ public class CommentServiceImpl implements CommentService {
     private final ArticleRepository articleRepository;
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
-    private final PageResponseMapper pageResponseMapper;
+    private final CommentPageResponseMapper pageResponseMapper;
 
 
     @Transactional
