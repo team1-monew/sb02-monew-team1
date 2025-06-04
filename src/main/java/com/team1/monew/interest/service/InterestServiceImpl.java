@@ -35,25 +35,25 @@ public class InterestServiceImpl implements InterestService {
       Keyword keyword = new Keyword(keywordStr);
       interest.addKeyword(keyword);
     });
-    return interestMapper.toDto(interestRepository.save(interest));
+    interestRepository.save(interest);
+    log.info("관심사 생성 완료 - interestId: {}, interestName: {}", interest.getId(), interest.getName());
+    return interestMapper.toDto(interest);
   }
 
   @Override
   @Transactional
   public InterestDto update(Long id, InterestUpdateRequest interestUpdateRequest) {
-    Interest interest = interestRepository.findById(id)
-        .orElseThrow(() -> {
-          log.warn("관심사 수정 실패 - 해당 관심사가 존재하지 않음, id: {}", id);
-          return new RestException(ErrorCode.NOT_FOUND, Map.of("id", id));
-        });
-    List<Keyword> keywords = interestUpdateRequest.keywords()
-        .stream()
-        .map(Keyword::new)
-        .toList();
+    Interest interest = interestRepository.findById(id).orElseThrow(() -> {
+      log.warn("관심사 수정 실패 - 해당 관심사가 존재하지 않음, id: {}, details: {}", id, "interest not found");
+      return new RestException(ErrorCode.NOT_FOUND, Map.of("id", id));
+    });
+    List<Keyword> keywords = interestUpdateRequest.keywords().stream().map(Keyword::new).toList();
 
     interest.updateKeywords(keywords);
 
-    return interestMapper.toDto(interestRepository.save(interest));
+    interestRepository.save(interest);
+    log.info("관심사 수정 완료 - interestId: {}", interest.getId());
+    return interestMapper.toDto(interest);
   }
 
   @Override
@@ -67,21 +67,19 @@ public class InterestServiceImpl implements InterestService {
   @Override
   @Transactional
   public void delete(Long id) {
-    Interest interest = interestRepository.findById(id)
-        .orElseThrow(() -> {
-          log.warn("관심사 삭제 실패 - 해당 관심사가 존재하지 않음, id: {}", id);
-          return new RestException(ErrorCode.NOT_FOUND, Map.of("id", id));
-        });
+    Interest interest = interestRepository.findById(id).orElseThrow(() -> {
+      log.warn("관심사 삭제 실패 - 해당 관심사가 존재하지 않음, id: {}, details: {}", id, "interest not found");
+      return new RestException(ErrorCode.NOT_FOUND, Map.of("id", id));
+    });
     interestRepository.deleteById(id);
+    log.info("관심사 삭제 완료 - interestId: {}", interest.getId());
   }
 
 
   // 연속된 앞쪽(접두사) + 뒷쪽(접미사) 문자의 유사도가 80%가 넘는지 테스트
   private void checkSimilarityInterestName(String name) {
     List<Interest> interests = interestRepository.findAll();
-    List<String> existingNames = interests.stream()
-        .map(Interest::getName)
-        .toList();
+    List<String> existingNames = interests.stream().map(Interest::getName).toList();
 
     for (String existing : existingNames) {
       int prefix = countPrefixMatch(name, existing);
@@ -93,7 +91,7 @@ public class InterestServiceImpl implements InterestService {
       double similarity = (double) totalMatch / baseLength;
 
       if (similarity >= 0.8) {
-        log.warn("관심사 등록 실패 - 유사도 80% 이상, name: {} / existing: {}", name, existing);
+        log.warn("관심사 등록 실패 - 유사도 80% 이상, name: {}, existing: {}", name, existing);
         throw new RestException(ErrorCode.SIMILARITY_OVER_VIOLATION, Map.of("interestName", name));
       }
     }
