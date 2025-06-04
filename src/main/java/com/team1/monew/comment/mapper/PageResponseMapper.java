@@ -30,7 +30,7 @@ public class PageResponseMapper {
             content,
             nextCursor,
             nextAfter,
-            (long) content.size(),
+            (long) condition.limit(),
             null,
             hasNext
         );
