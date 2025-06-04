@@ -46,8 +46,7 @@ public class HeaderUserAuthenticationFilter extends OncePerRequestFilter {
 
     if (userIdHeader == null) {
       log.warn("인증 헤더 없음 - 요청 경로: {}", path);
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "헤더에 사용자 ID 없음");
-      return;
+      throw new RestException(ErrorCode.UNAUTHORIZED, Map.of("header", "Monew-Request-User-ID 없음"));
     }
 
     try {
