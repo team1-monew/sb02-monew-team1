@@ -49,6 +49,7 @@ public class Interest {
         keywords.forEach(this::addKeyword);
     }
 
+    // Todo: 동시성 제어 (update atomic 쿼리 vs 낙관적 / 비관적 락)
     public void updateSubscriberCount(Long count) {
         this.subscriberCount = count;
     }

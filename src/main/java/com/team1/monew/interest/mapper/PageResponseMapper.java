@@ -33,7 +33,7 @@ public class PageResponseMapper {
         content,
         nextCursor,
         nextAfter,
-        (long) content.size(),
+        (long) interestSearchCondition.limit(),
         null,
         interestDtoSlice.hasNext()
     );
