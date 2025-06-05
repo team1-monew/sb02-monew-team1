@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CommentLikeServiceImpl implements CommentLikeService {
 
     private final CommentLikeRepository commentLikeRepository;
+    private final CommentLikeCountService commentLikeCountService;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final CommentLikeMapper commentLikeMapper;
@@ -39,6 +40,14 @@ public class CommentLikeServiceImpl implements CommentLikeService {
                     "detail", "Comment not found"
                 ));
             });
+
+        if (comment.isDeleted()) {
+            log.warn("논리 삭제된 댓글에 좋아요 시도 - commentId: {}", commentId);
+            throw new RestException(ErrorCode.ACCESS_DENIED, Map.of(
+                "commentId", commentId,
+                "detail", "Cannot like a soft deleted comment"
+            ));
+        }
 
         User likedBy = userRepository.findById(userId)
             .orElseThrow(() -> {
@@ -62,8 +71,10 @@ public class CommentLikeServiceImpl implements CommentLikeService {
         CommentLike savedCommentLike = commentLikeRepository.save(commentLike);
         log.info("댓글 좋아요 완료 - commentId: {}, userId: {}", commentId, userId);
 
-        Long commentLikeCount = commentLikeRepository.countByCommentId(commentId);
-        CommentLikeDto dto = commentLikeMapper.toDto(savedCommentLike, commentLikeCount);
+        // likeCount 업데이트
+        Long likeCount = commentLikeCountService.updateLikeCountByCommentId(commentId);
+
+        CommentLikeDto dto = commentLikeMapper.toDto(savedCommentLike, likeCount);
         log.debug("댓글 좋아요 DTO 반환 - {}", dto);
 
         return dto;
@@ -85,6 +96,26 @@ public class CommentLikeServiceImpl implements CommentLikeService {
             });
 
         commentLikeRepository.delete(commentLike);
+
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(()->{
+                log.warn("댓글 조회 실패 - commentId: {}", commentId);
+                return new RestException(ErrorCode.NOT_FOUND, Map.of(
+                    "commentId", commentId,
+                    "detail", "Comment not found"
+                ));
+            });
+
+        if (comment.isDeleted()) {
+            log.warn("논리 삭제된 댓글에 좋아요 취소 시도 - commentId: {}", commentId);
+            throw new RestException(ErrorCode.ACCESS_DENIED, Map.of(
+                "commentId", commentId,
+                "detail", "Cannot unlike a soft deleted comment"
+            ));
+        }
+
+        // likeCount 업데이트
+        commentLikeCountService.updateLikeCountByCommentId(commentId);
 
         log.info("댓글 좋아요 취소 완료 - commentId: {}, userId: {}", commentId, userId);
     }

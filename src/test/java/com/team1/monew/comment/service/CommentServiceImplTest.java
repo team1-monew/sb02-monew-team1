@@ -122,6 +122,26 @@ public class CommentServiceImplTest {
     }
 
     @Test
+    void 댓글등록_예외발생_기사논리삭제() {
+        // given
+        Long userId = 1L;
+        Long articleId = 10L;
+
+        User user = mock(User.class);
+        Article article = mock(Article.class);
+        when(article.isDeleted()).thenReturn(true);
+
+        CommentRegisterRequest request = new CommentRegisterRequest(articleId, userId, "댓글입니다");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(articleRepository.findById(articleId)).thenReturn(Optional.of(article));
+
+        // when & then
+        assertThrows(RestException.class, () -> commentService.register(request));
+        verify(articleRepository).findById(articleId);
+    }
+
+    @Test
     void 댓글수정_성공() {
         // given
         Long userId = 1L;
@@ -174,6 +194,25 @@ public class CommentServiceImplTest {
         CommentUpdateRequest request = new CommentUpdateRequest("수정");
 
         when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThrows(RestException.class, () -> commentService.update(request, commentId, userId));
+        verify(commentRepository).findById(commentId);
+    }
+
+    @Test
+    void 댓글수정_예외발생_댓글논리삭제() {
+        // given
+        Long userId = 1L;
+        User user = mock(User.class);
+        when(user.getId()).thenReturn(userId);
+        Long commentId = 999L;
+        Comment comment = mock(Comment.class);
+        when(comment.getUser()).thenReturn(user);
+        when(comment.isDeleted()).thenReturn(true);
+        CommentUpdateRequest request = new CommentUpdateRequest("수정");
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
         // when & then
         assertThrows(RestException.class, () -> commentService.update(request, commentId, userId));
