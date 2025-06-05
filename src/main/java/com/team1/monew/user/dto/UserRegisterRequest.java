@@ -2,6 +2,7 @@ package com.team1.monew.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record UserRegisterRequest (
@@ -14,7 +15,10 @@ public record UserRegisterRequest (
     String nickname,
 
     @NotBlank
-    @Size(min = 6, max = 20)
+    @Pattern(
+        regexp = "^(?=.*[0-9])(?=.*[!@#$%^&*(),.?\":{}|<>])[A-Za-z0-9!@#$%^&*(),.?\":{}|<>]{6,20}$",
+        message = "비밀번호는 6~20자이며 숫자와 특수문자를 포함해야 합니다."
+    )
     String password
 ){
   public static class Builder {

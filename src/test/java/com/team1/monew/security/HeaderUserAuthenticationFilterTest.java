@@ -9,11 +9,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.team1.monew.exception.RestException;
+import com.team1.monew.security.filter.HeaderUserAuthenticationFilter;
 import com.team1.monew.user.dto.UserRegisterRequest;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -101,11 +102,10 @@ class HeaderUserAuthenticationFilterTest {
     MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/protected");
     MockHttpServletResponse response = new MockHttpServletResponse();
 
-    // when
-    filter.doFilter(request, response, filterChain);
+    // when & then
 
     // then
-    assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_UNAUTHORIZED);
+    assertThrows(RestException.class, () -> filter.doFilter(request, response, filterChain));
     verify(filterChain, never()).doFilter(any(), any());
   }
 
@@ -120,6 +120,6 @@ class HeaderUserAuthenticationFilterTest {
     when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
     // when & then
-    assertThrows(RuntimeException.class, () -> filter.doFilter(request, response, filterChain));
+    assertThrows(RestException.class, () -> filter.doFilter(request, response, filterChain));
   }
 }

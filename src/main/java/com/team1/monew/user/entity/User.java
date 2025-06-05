@@ -39,6 +39,9 @@ public class User {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        if (email != null) {
+            email = email.toLowerCase();
+        }
     }
 
     // 기본 생성자 (JPA 필수)
