@@ -18,11 +18,6 @@ public class UserActivity {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Column(nullable = false, length = 50)
-    private String actionType;
-
-    @Column(nullable = true, length = 1000)
-    private String description;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -37,8 +32,6 @@ public class UserActivity {
 
     public UserActivity(User user, String actionType, String description) {
         this.user = user;
-        this.actionType = actionType;
-        this.description = description;
         this.createdAt = LocalDateTime.now();
     }
 
