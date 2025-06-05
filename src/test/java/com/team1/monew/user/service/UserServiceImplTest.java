@@ -7,6 +7,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 import com.team1.monew.exception.RestException;
+import com.team1.monew.interest.repository.InterestRepository;
+import com.team1.monew.subscription.repository.SubscriptionRepository;
 import com.team1.monew.user.dto.UserDto;
 import com.team1.monew.user.dto.UserLoginRequest;
 import com.team1.monew.user.dto.UserRegisterRequest;
@@ -14,6 +16,7 @@ import com.team1.monew.user.dto.UserUpdateRequest;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.mapper.UserMapper;
 import com.team1.monew.user.repository.UserRepository;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +31,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 class UserServiceImplTest {
   @Mock
   UserRepository userRepository;
+
+  @Mock
+  InterestRepository interestRepository;
+
+  @Mock
+  SubscriptionRepository subscriptionRepository;
+
 
   @Mock
   UserMapper userMapper;
@@ -147,6 +157,7 @@ class UserServiceImplTest {
   void deleteUser() {
     // given
     given(userRepository.findById(any(Long.class))).willReturn(Optional.of(deletedUser));
+    given(subscriptionRepository.findByUserIdFetch(any(Long.class))).willReturn(List.of());
 
     // when
     userService.deleteUser(1L);
@@ -160,6 +171,8 @@ class UserServiceImplTest {
   void deleteUserHard() {
     // given
     given(userRepository.existsById(any(Long.class))).willReturn(true);
+    given(subscriptionRepository.findByUserIdFetch(any(Long.class))).willReturn(List.of());
+
 
     // when
     userService.deleteUserHard(1L);

@@ -10,8 +10,11 @@ import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.interest.entity.Keyword;
 import com.team1.monew.interest.mapper.InterestMapper;
 import com.team1.monew.interest.repository.InterestRepository;
+import com.team1.monew.subscription.repository.SubscriptionRepository;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Slice;
@@ -24,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class InterestServiceImpl implements InterestService {
 
   private final InterestRepository interestRepository;
+  private final SubscriptionRepository subscriptionRepository;
   private final InterestMapper interestMapper;
 
   @Override
@@ -37,12 +41,12 @@ public class InterestServiceImpl implements InterestService {
     });
     interestRepository.save(interest);
     log.info("관심사 생성 완료 - interestId: {}, interestName: {}", interest.getId(), interest.getName());
-    return interestMapper.toDto(interest);
+    return interestMapper.toDto(interest, false);
   }
 
   @Override
   @Transactional
-  public InterestDto update(Long id, InterestUpdateRequest interestUpdateRequest) {
+  public InterestDto update(Long id, Long userId, InterestUpdateRequest interestUpdateRequest) {
     Interest interest = interestRepository.findById(id).orElseThrow(() -> {
       log.warn("관심사 수정 실패 - 해당 관심사가 존재하지 않음, id: {}", id);
       return new RestException(ErrorCode.NOT_FOUND,
@@ -54,15 +58,21 @@ public class InterestServiceImpl implements InterestService {
 
     interestRepository.save(interest);
     log.info("관심사 수정 완료 - interestId: {}", interest.getId());
-    return interestMapper.toDto(interest);
+    return interestMapper.toDto(interest,
+        subscriptionRepository.existsByInterest_IdAndUser_Id(id, userId));
   }
 
   @Override
   @Transactional
   public Slice<InterestDto> findInterestsWithCursor(
-      InterestSearchCondition interestSearchCondition) {
+      Long userId, InterestSearchCondition interestSearchCondition) {
     Slice<Interest> interests = interestRepository.searchByCondition(interestSearchCondition);
-    return interests.map(interestMapper::toDto);
+    // 쿼리를 1번만 날리기 위해 userId를 가진 subscription id 전체 조회
+    // contains 연산을 O(1)로 하기 위해 set 사용
+    Set<Long> subscribedSet = new HashSet<>(
+        subscriptionRepository.findSubscribedInterestIdByUserId(userId));
+    return interests.map(
+        interest -> interestMapper.toDto(interest, subscribedSet.contains(interest.getId())));
   }
 
   @Override

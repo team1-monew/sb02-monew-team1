@@ -44,8 +44,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     checkDuplicateSubscription(interestId, userId);
     Subscription subscription = new Subscription(user, interest);
     subscriptionRepository.save(subscription);
-    // Todo: 동시성 제어 (update atomic 쿼리 vs 낙관적 / 비관적 락)
-    interest.updateSubscriberCount(interest.getSubscriberCount() + 1);
+
+    interestRepository.incrementSubscriberCount(interestId);
     log.info("관심사 구독 완료 - interestId: {}, userId: {}", interestId, userId);
 
     return subscriptionMapper.toDto(subscription);
@@ -65,9 +65,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         });
     subscriptionRepository.deleteById(subscription.getId());
 
-    Interest interest = subscription.getInterest();
-    // Todo: 동시성 제어 (update atomic 쿼리 vs 낙관적 / 비관적 락)
-    interest.updateSubscriberCount(interest.getSubscriberCount() - 1);
+    interestRepository.decrementSubscriberCount(interestId);
     
     log.info("관심사 구독 취소 완료 - interestId: {}, userId: {}", interestId, userId);
   }
