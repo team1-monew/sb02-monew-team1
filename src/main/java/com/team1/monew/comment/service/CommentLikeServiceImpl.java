@@ -40,6 +40,14 @@ public class CommentLikeServiceImpl implements CommentLikeService {
                 ));
             });
 
+        if (comment.isDeleted()) {
+            log.warn("논리 삭제된 댓글에 좋아요 시도 - commentId: {}", commentId);
+            throw new RestException(ErrorCode.ACCESS_DENIED, Map.of(
+                "commentId", commentId,
+                "detail", "Cannot like a soft deleted comment"
+            ));
+        }
+
         User likedBy = userRepository.findById(userId)
             .orElseThrow(() -> {
                 log.warn("사용자 조회 실패 - userId: {}", userId);
@@ -98,6 +106,14 @@ public class CommentLikeServiceImpl implements CommentLikeService {
                     "detail", "Comment not found"
                 ));
             });
+
+        if (comment.isDeleted()) {
+            log.warn("논리 삭제된 댓글에 좋아요 취소 시도 - commentId: {}", commentId);
+            throw new RestException(ErrorCode.ACCESS_DENIED, Map.of(
+                "commentId", commentId,
+                "detail", "Cannot unlike a soft deleted comment"
+            ));
+        }
 
         // likeCount 업데이트
         Long likeCount = commentLikeRepository.countByCommentId(commentId);

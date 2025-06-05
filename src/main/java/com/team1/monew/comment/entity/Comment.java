@@ -72,5 +72,6 @@ public class Comment {
 
     public void delete() {
         this.isDeleted = true;
+        this.updatedAt = LocalDateTime.now();
     }
 }
