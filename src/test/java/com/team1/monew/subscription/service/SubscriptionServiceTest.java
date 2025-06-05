@@ -52,14 +52,15 @@ public class SubscriptionServiceTest {
     given(userRepository.findById(any(Long.class))).willReturn(Optional.of(user));
     given(subscriptionRepository.existsByInterest_IdAndUser_Id(any(Long.class),
         any(Long.class))).willReturn(false);
+    willDoNothing().given(interestRepository).incrementSubscriberCount(1L);
 
     // when
     SubscriptionDto subscriptionDto = subscriptionService.create(interest.getId(), user.getId());
 
     // then
     assertThat(subscriptionDto.interestId()).isEqualTo(interest.getId());
-    assertThat(subscriptionDto.interestSubscriberCount()).isEqualTo(1L);
     then(subscriptionRepository).should(times(1)).save(any(Subscription.class));
+    then(interestRepository).should(times(1)).incrementSubscriberCount(any());
   }
 
   @Test
@@ -132,13 +133,14 @@ public class SubscriptionServiceTest {
 
     given(subscriptionRepository.findByInterest_IdAndUser_Id(interest.getId(), user.getId()))
         .willReturn(Optional.of(subscription));
+    willDoNothing().given(interestRepository).decrementSubscriberCount(1L);
 
     // when
     subscriptionService.delete(interest.getId(), user.getId());
 
     // then
     then(subscriptionRepository).should().deleteById(subscription.getId());
-    assertThat(interest.getSubscriberCount()).isEqualTo(4L); // -1 되었는지 확인
+    then(interestRepository).should(times(1)).decrementSubscriberCount(any());
   }
 
   @Test

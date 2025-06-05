@@ -9,6 +9,7 @@ import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.interest.entity.Keyword;
 import com.team1.monew.interest.mapper.InterestMapper;
 import com.team1.monew.interest.repository.InterestRepository;
+import com.team1.monew.subscription.repository.SubscriptionRepository;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +32,9 @@ public class InterestServiceTest {
 
   @Mock
   InterestRepository interestRepository;
+
+  @Mock
+  SubscriptionRepository subscriptionRepository;
 
   // 공유 의존성이 아니므로 Mocking 하지 않고 실제 객체 사용
   @Spy
@@ -110,9 +114,10 @@ public class InterestServiceTest {
 
     given(interestRepository.findById(any(Long.class))).willReturn(Optional.of(interest));
     given(interestRepository.save(any(Interest.class))).willReturn(interest);
+    given(subscriptionRepository.existsByInterest_IdAndUser_Id(any(Long.class), any(Long.class))).willReturn(true);
 
     // when
-    InterestDto interestDto = interestService.update(1L,interestUpdateRequest);
+    InterestDto interestDto = interestService.update(1L,1L, interestUpdateRequest);
 
     // then
     assertThat(interestDto.keywords())
@@ -129,7 +134,7 @@ public class InterestServiceTest {
     given(interestRepository.findById(any(Long.class))).willReturn(Optional.empty());
 
     // when + then
-    assertThatThrownBy(() -> interestService.update(1L,interestUpdateRequest))
+    assertThatThrownBy(() -> interestService.update(1L,1L, interestUpdateRequest))
         .isInstanceOf(RestException.class)
         .hasMessageContaining("찾을 수 없습니다.");
     then(interestRepository).should(never()).save(any(Interest.class));
@@ -168,13 +173,19 @@ public class InterestServiceTest {
   @DisplayName("관심사 조회 성공")
   void findInterests_success() {
     // given
-    Slice<Interest> interests = new SliceImpl<>(List.of(new Interest("테스트")));
+    Interest interest = new Interest("테스트");
+    ReflectionTestUtils.setField(interest, "id", 1L);
+    Slice<Interest> interests = new SliceImpl<>(List.of(interest));
     given(interestRepository.searchByCondition(any())).willReturn(interests);
+    given(subscriptionRepository.findSubscribedInterestIdByUserId(any(Long.class))).willReturn(List.of(interest.getId()));
 
     // when
-    interestService.findInterestsWithCursor(mock(InterestSearchCondition.class));
+    Slice<InterestDto> interestDtoList = interestService.findInterestsWithCursor(1L, mock(InterestSearchCondition.class));
 
     // then
+    assertThat(interestDtoList.getSize()).isEqualTo(1);
+    assertThat(interestDtoList.getContent().get(0).name()).isEqualTo("테스트");
+    assertThat(interestDtoList.getContent().get(0).subscribedByMe()).isTrue();
     then(interestRepository).should(times(1)).searchByCondition(any());
   }
 }

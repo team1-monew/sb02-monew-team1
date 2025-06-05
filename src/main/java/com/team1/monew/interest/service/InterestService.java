@@ -8,7 +8,7 @@ import org.springframework.data.domain.Slice;
 
 public interface InterestService {
   InterestDto create(InterestRegisterRequest interestRegisterRequest);
-  InterestDto update(Long id, InterestUpdateRequest interestUpdateRequest);
-  Slice<InterestDto> findInterestsWithCursor(InterestSearchCondition interestSearchCondition);
+  InterestDto update(Long id, Long userId, InterestUpdateRequest interestUpdateRequest);
+  Slice<InterestDto> findInterestsWithCursor(Long userId, InterestSearchCondition interestSearchCondition);
   void delete(Long id);
 }
