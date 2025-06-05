@@ -49,13 +49,13 @@ public class UserController {
         .body(createdUser);
   }
 
-  @PatchMapping("/{userdId}")
+  @PatchMapping("/{userId}")
   public ResponseEntity<UserDto> update(
-      @PathVariable Long userdId,
+      @PathVariable Long userId,
       @RequestBody @Valid UserUpdateRequest userUpdateRequest
   ) {
-    log.info("사용자 수정 요청: id={}, request={}", userdId, userUpdateRequest);
-    UserDto updatedUser = userService.updateUser(userdId, userUpdateRequest);
+    log.info("사용자 수정 요청: id={}, request={}", userId, userUpdateRequest);
+    UserDto updatedUser = userService.updateUser(userId, userUpdateRequest);
     log.debug("사용자 수정 응답: {}", updatedUser);
     return ResponseEntity
         .status(HttpStatus.OK)
@@ -78,7 +78,7 @@ public class UserController {
       @PathVariable Long userId
   ) {
     log.info("사용자 물리 삭제 요청: id={}", userId);
-    userService.deleteUser(userId);
+    userService.deleteUserHard(userId);
     return ResponseEntity
         .status(HttpStatus.NO_CONTENT)
         .build();
