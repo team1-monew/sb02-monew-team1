@@ -64,7 +64,7 @@ public class InterestController {
         .build();
 
     Slice<InterestDto> interestDtoList = interestService.findInterestsWithCursor(
-        interestSearchCondition);
+        userId, interestSearchCondition);
     return ResponseEntity.status(HttpStatus.OK)
         .body(pageResponseMapper.toPageResponse(interestDtoList, interestSearchCondition));
   }
@@ -76,7 +76,7 @@ public class InterestController {
       @PathVariable("interestId") Long interestId,
       @RequestHeader("Monew-Request-User-ID") Long userId) {
     log.info("관심사 수정 요청 - userId: {}, interestId: {}", userId, interestId);
-    InterestDto interestDto = interestService.update(interestId, interestUpdateRequest);
+    InterestDto interestDto = interestService.update(interestId, userId, interestUpdateRequest);
     return ResponseEntity.status(HttpStatus.OK).body(interestDto);
   }
 
