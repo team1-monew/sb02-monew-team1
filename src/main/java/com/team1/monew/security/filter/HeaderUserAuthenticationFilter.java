@@ -1,7 +1,9 @@
-package com.team1.monew.security;
+package com.team1.monew.security.filter;
 
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
+import com.team1.monew.security.auth.CustomUserDetails;
+import com.team1.monew.security.util.SecurityPathUtil;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -10,7 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
