@@ -1,11 +1,12 @@
 package com.team1.monew.user.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import com.team1.monew.comment.service.CommentLikeCountService;
 import com.team1.monew.exception.RestException;
 import com.team1.monew.interest.repository.InterestRepository;
 import com.team1.monew.subscription.repository.SubscriptionRepository;
@@ -38,6 +39,9 @@ class UserServiceImplTest {
   @Mock
   SubscriptionRepository subscriptionRepository;
 
+
+  @Mock
+  CommentLikeCountService commentLikeCountService;
 
   @Mock
   UserMapper userMapper;
@@ -157,7 +161,6 @@ class UserServiceImplTest {
   void deleteUser() {
     // given
     given(userRepository.findById(any(Long.class))).willReturn(Optional.of(deletedUser));
-    given(subscriptionRepository.findByUserIdFetch(any(Long.class))).willReturn(List.of());
 
     // when
     userService.deleteUser(1L);
