@@ -1,5 +1,6 @@
 package com.team1.monew.user.service;
 
+import com.team1.monew.comment.service.CommentLikeCountService;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
 import com.team1.monew.interest.repository.InterestRepository;
@@ -28,6 +29,7 @@ public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
   private final InterestRepository interestRepository;
   private final SubscriptionRepository subscriptionRepository;
+  private final CommentLikeCountService commentLikeCountService;
   private final UserMapper userMapper;
 
   @Override
@@ -86,7 +88,6 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  @Transactional
   public void deleteUser(Long id) {
     User user = userRepository.findById(id).orElseThrow(
         () -> new RestException(ErrorCode.NOT_FOUND, Map.of("id", id))
@@ -99,10 +100,11 @@ public class UserServiceImpl implements UserService {
     subscriptionRepository.deleteAll(subscriptionList);
 
     log.info("사용자 논리 삭제 완료: id={}", id);
+
+    commentLikeCountService.updateLikeCountByDeletedUser(id);
   }
 
   @Override
-  @Transactional
   public void deleteUserHard(Long id) {
     if (!userRepository.existsById(id)) {
       throw new RestException(ErrorCode.NOT_FOUND, Map.of("id", id));
@@ -112,6 +114,7 @@ public class UserServiceImpl implements UserService {
     subscriptionList.forEach(
         subscription -> interestRepository.decrementSubscriberCount(subscription.getInterest().getId()));
 
+    commentLikeCountService.updateLikeCountByDeletedUser(id);
     userRepository.deleteById(id);
     log.info("사용자 물리 삭제 완료: id={}", id);
   }

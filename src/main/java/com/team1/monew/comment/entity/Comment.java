@@ -63,7 +63,15 @@ public class Comment {
         }
     }
 
+    public void updateLikeCount(Long newLikeCount){
+        if (newLikeCount != null) {
+            this.likeCount = newLikeCount;
+            this.updatedAt = LocalDateTime.now();
+        }
+    }
+
     public void delete() {
         this.isDeleted = true;
+        this.updatedAt = LocalDateTime.now();
     }
 }
