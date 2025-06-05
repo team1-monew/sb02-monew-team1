@@ -61,6 +61,14 @@ public class CommentServiceImpl implements CommentService {
                 ));
             });
 
+        if (article.isDeleted()) {
+            log.warn("논리 삭제된 기사에 댓글 등록 요청 - articleId: {}", request.articleId());
+            throw new RestException(ErrorCode.ACCESS_DENIED, Map.of(
+                "articleId", request.articleId(),
+                "detail", "Cannot comment on a deleted article"
+            ));
+        }
+
         Comment newComment = new Comment(article, user, request.content());
 
         Comment savedComment = commentRepository.save(newComment);
@@ -97,6 +105,14 @@ public class CommentServiceImpl implements CommentService {
                 "commentId", commentId,
                 "userId", userId,
                 "detail", "You do not have permission to update this comment"
+            ));
+        }
+
+        if (comment.isDeleted()){
+            log.warn("논리 삭제 된 댓글 수정 요청 - commentId: {}", commentId);
+            throw new RestException(ErrorCode.ACCESS_DENIED, Map.of(
+                "commentId", commentId,
+                "detail", "soft deleted comment cannot be updated"
             ));
         }
 

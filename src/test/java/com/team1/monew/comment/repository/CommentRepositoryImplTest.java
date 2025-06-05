@@ -68,6 +68,9 @@ public class CommentRepositoryImplTest {
         jdbcTemplate.update("UPDATE comments SET created_at = ? WHERE id = ?", Timestamp.valueOf(baseTime.minusMinutes(10)), c1.getId());
         jdbcTemplate.update("UPDATE comments SET created_at = ? WHERE id = ?", Timestamp.valueOf(baseTime), c2.getId());
 
+        em.flush();
+        em.clear();
+
         CommentSearchCondition condition = CommentSearchCondition.fromParams(
             article.getId(),
             "createdAt",
@@ -86,19 +89,26 @@ public class CommentRepositoryImplTest {
     }
 
     @Test
-    void likeCount_기준_asc_정렬() {
-        Comment c1 = new Comment(article, user, "like 5");
-        Comment c2 = new Comment(article, user, "like 10");
+    void likeCount_기준_asc_정렬_created_desc_정렬() {
+        // given
+        Comment c1 = new Comment(article, user, "like 5 - old");
+        Comment c2 = new Comment(article, user, "like 5 - new");
+        Comment c3 = new Comment(article, user, "like 10");
         em.persist(c1);
         em.persist(c2);
+        em.persist(c3);
         em.flush();
 
         jdbcTemplate.update("UPDATE comments SET like_count = ? WHERE id = ?", 5L, c1.getId());
-        jdbcTemplate.update("UPDATE comments SET like_count = ? WHERE id = ?", 10L, c2.getId());
+        jdbcTemplate.update("UPDATE comments SET like_count = ? WHERE id = ?", 5L, c2.getId());
+        jdbcTemplate.update("UPDATE comments SET like_count = ? WHERE id = ?", 10L, c3.getId());
+
+        em.flush();
+        em.clear();
 
         CommentSearchCondition condition = CommentSearchCondition.fromParams(
             article.getId(),
-            "createdAt",
+            "likeCount",
             "ASC",
             null,
             null,
@@ -109,8 +119,20 @@ public class CommentRepositoryImplTest {
         Slice<Comment> result = commentRepository.searchByCondition(condition);
         List<Comment> content = result.getContent();
 
-        assertEquals(2, content.size());
+        assertEquals(3, content.size());
+
+        // likeCount 기준 오름차순 정렬 확인
         assertTrue(content.get(0).getLikeCount() <= content.get(1).getLikeCount());
+        assertTrue(content.get(1).getLikeCount() <= content.get(2).getLikeCount());
+
+        // 동일한 likeCount(5) 내에서 createdAt DESC인지 (c2가 c1보다 앞에 와야 함)
+        if (content.get(0).getLikeCount().equals(5L) &&
+            content.get(1).getLikeCount().equals(5L)) {
+            assertTrue(content.get(0).getCreatedAt().isAfter(content.get(1).getCreatedAt()));
+        }
+
+        // 마지막은 likeCount 10인 c3여야 함
+        assertEquals(10L, content.get(2).getLikeCount());
     }
 
     @Test
