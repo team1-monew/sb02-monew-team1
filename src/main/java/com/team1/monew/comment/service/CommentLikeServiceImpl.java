@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CommentLikeServiceImpl implements CommentLikeService {
 
     private final CommentLikeRepository commentLikeRepository;
+    private final CommentLikeCountService commentLikeCountService;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final CommentLikeMapper commentLikeMapper;
@@ -71,9 +72,7 @@ public class CommentLikeServiceImpl implements CommentLikeService {
         log.info("댓글 좋아요 완료 - commentId: {}, userId: {}", commentId, userId);
 
         // likeCount 업데이트
-        Long likeCount = commentLikeRepository.countByCommentId(commentId);
-        comment.updateLikeCount(likeCount);
-        log.debug("댓글 좋아요 카운트 업데이트 - commentId: {}, likeCount: {}", commentId, likeCount);
+        Long likeCount = commentLikeCountService.updateLikeCountByCommentId(commentId);
 
         CommentLikeDto dto = commentLikeMapper.toDto(savedCommentLike, likeCount);
         log.debug("댓글 좋아요 DTO 반환 - {}", dto);
@@ -116,10 +115,7 @@ public class CommentLikeServiceImpl implements CommentLikeService {
         }
 
         // likeCount 업데이트
-        Long likeCount = commentLikeRepository.countByCommentId(commentId);
-        comment.updateLikeCount(likeCount);
-        commentRepository.save(comment);
-        log.debug("댓글 좋아요 카운트 업데이트 - commentId: {}, likeCount: {}", commentId, likeCount);
+        commentLikeCountService.updateLikeCountByCommentId(commentId);
 
         log.info("댓글 좋아요 취소 완료 - commentId: {}, userId: {}", commentId, userId);
     }
