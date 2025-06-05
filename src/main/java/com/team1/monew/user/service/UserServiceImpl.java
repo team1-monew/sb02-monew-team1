@@ -26,10 +26,13 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserDto createUser(UserRegisterRequest userRegisterRequest) {
     log.debug("사용자 생성 시작: email={}, nickname={}", userRegisterRequest.email(), userRegisterRequest.nickname());
-    validateEmailNotDuplicated(userRegisterRequest.email());
+
+    String normalizedEmail = userRegisterRequest.email().toLowerCase();
+
+    validateEmailNotDuplicated(normalizedEmail);
 
     User user = User.builder()
-            .email(userRegisterRequest.email())
+            .email(normalizedEmail)
                 .nickname(userRegisterRequest.nickname())
                     .password(userRegisterRequest.password())
                         .build();
@@ -43,14 +46,14 @@ public class UserServiceImpl implements UserService {
   public UserDto login(UserLoginRequest userLoginRequest) {
     log.debug("로그인 시도: email={}", userLoginRequest.email());
 
-    String email = userLoginRequest.email();
+    String normalizedEmail = userLoginRequest.email().toLowerCase();
     String password = userLoginRequest.password();
 
-    User user = userRepository.findByEmail(email)
+    User user = userRepository.findByEmail(normalizedEmail)
             .orElseThrow(() -> new RestException(ErrorCode.INVALID_CREDENTIALS)
             );
 
-    if (!user.getPassword().equals(password)) {
+    if (!user.getPassword().equals(password) || user.isDeleted()) {
       throw new RestException(ErrorCode.INVALID_CREDENTIALS);
     }
 

@@ -1,6 +1,5 @@
-package com.team1.monew.security;
+package com.team1.monew.security.util;
 
-import lombok.Getter;
 import org.springframework.util.AntPathMatcher;
 
 import java.util.Set;

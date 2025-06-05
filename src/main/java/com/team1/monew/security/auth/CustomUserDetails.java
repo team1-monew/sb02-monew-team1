@@ -1,4 +1,4 @@
-package com.team1.monew.security;
+package com.team1.monew.security.auth;
 
 import com.team1.monew.user.entity.User;
 import java.util.Collection;
