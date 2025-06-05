@@ -62,8 +62,12 @@ public class CommentLikeServiceImpl implements CommentLikeService {
         CommentLike savedCommentLike = commentLikeRepository.save(commentLike);
         log.info("댓글 좋아요 완료 - commentId: {}, userId: {}", commentId, userId);
 
-        Long commentLikeCount = commentLikeRepository.countByCommentId(commentId);
-        CommentLikeDto dto = commentLikeMapper.toDto(savedCommentLike, commentLikeCount);
+        // likeCount 업데이트
+        Long likeCount = commentLikeRepository.countByCommentId(commentId);
+        comment.updateLikeCount(likeCount);
+        log.debug("댓글 좋아요 카운트 업데이트 - commentId: {}, likeCount: {}", commentId, likeCount);
+
+        CommentLikeDto dto = commentLikeMapper.toDto(savedCommentLike, likeCount);
         log.debug("댓글 좋아요 DTO 반환 - {}", dto);
 
         return dto;
@@ -85,6 +89,21 @@ public class CommentLikeServiceImpl implements CommentLikeService {
             });
 
         commentLikeRepository.delete(commentLike);
+
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(()->{
+                log.warn("댓글 조회 실패 - commentId: {}", commentId);
+                return new RestException(ErrorCode.NOT_FOUND, Map.of(
+                    "commentId", commentId,
+                    "detail", "Comment not found"
+                ));
+            });
+
+        // likeCount 업데이트
+        Long likeCount = commentLikeRepository.countByCommentId(commentId);
+        comment.updateLikeCount(likeCount);
+        commentRepository.save(comment);
+        log.debug("댓글 좋아요 카운트 업데이트 - commentId: {}, likeCount: {}", commentId, likeCount);
 
         log.info("댓글 좋아요 취소 완료 - commentId: {}, userId: {}", commentId, userId);
     }
