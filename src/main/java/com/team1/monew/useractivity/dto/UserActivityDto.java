@@ -1,21 +1,23 @@
 package com.team1.monew.useractivity.dto;
 
-import com.team1.monew.article.entity.ArticleView;
-import com.team1.monew.comment.entity.Comment;
-import com.team1.monew.comment.entity.CommentLike;
-import com.team1.monew.subscription.entity.Subscription;
-import java.time.Instant;
+import com.team1.monew.article.dto.ArticleViewDto;
+import com.team1.monew.comment.dto.CommentActivityDto;
+import com.team1.monew.comment.dto.CommentLikeActivityDto;
+import com.team1.monew.subscription.dto.SubscriptionDto;
+import java.time.LocalDateTime;
 import java.util.List;
+import lombok.Builder;
 
+@Builder
 public record UserActivityDto(
     Long id,
     String email,
     String nickname,
-    Instant createdAt,
-    List<Subscription> subscriptions,
-    List<Comment> comments,
-    List<CommentLike> commentLikes,
-    List<ArticleView> articleViews
+    LocalDateTime createdAt,
+    List<SubscriptionDto> subscriptions,
+    List<CommentActivityDto> comments,
+    List<CommentLikeActivityDto> commentLikes,
+    List<ArticleViewDto> articleViews
 ) {
 
 }
