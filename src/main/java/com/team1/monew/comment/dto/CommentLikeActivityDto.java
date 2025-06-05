@@ -1,7 +1,9 @@
 package com.team1.monew.comment.dto;
 
 import java.time.LocalDateTime;
+import lombok.Builder;
 
+@Builder
 public record CommentLikeActivityDto(
     Long id,
     LocalDateTime createdAt,
