@@ -1,6 +1,7 @@
 package com.team1.monew.notification.service;
 
 import com.team1.monew.comment.entity.Comment;
+import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.notification.dto.ResourceType;
 import com.team1.monew.notification.entity.Notification;
 import com.team1.monew.notification.repository.NotificationRepository;
@@ -14,6 +15,21 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
   private final NotificationRepository notificationRepository;
+
+  @Override
+  public void notifyNewArticles(User user, Interest interest, int articleCount) {
+    Notification notification = Notification.builder()
+        .user(user)
+        .content(String.format("[%s]와 관련된 기사가 %d건 등록되었습니다.", interest.getName(), articleCount))
+        .resourceType(ResourceType.INTEREST.getName())
+        .resourceId(interest.getId())
+        .build();
+
+    notificationRepository.save(notification);
+
+    log.info("신규 기사 알림 생성 - 사용자 ID: {}, 관심사 ID: {}, 기사 수: {}",
+        user.getId(), interest.getId(), articleCount);
+  }
 
   @Override
   public void notifyCommentLiked(Comment comment, User likedBy) {
