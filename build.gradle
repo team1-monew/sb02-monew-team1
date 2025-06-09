@@ -45,6 +45,12 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	implementation 'software.amazon.awssdk:s3:2.20.56'
+
+	implementation 'org.springframework.batch:spring-batch-core:5.1.0'
+	implementation 'org.springframework.boot:spring-boot-starter-batch'
+	implementation 'org.springframework:spring-tx'
+	implementation 'org.springframework:spring-context:6.2.7'
+	implementation 'org.springframework:spring-core:6.2.7'
 }
 
 tasks.named('test') {
