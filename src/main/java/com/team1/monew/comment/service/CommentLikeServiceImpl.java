@@ -3,6 +3,7 @@ package com.team1.monew.comment.service;
 import com.team1.monew.comment.dto.CommentLikeDto;
 import com.team1.monew.comment.entity.Comment;
 import com.team1.monew.comment.entity.CommentLike;
+import com.team1.monew.comment.event.CommentLikedEvent;
 import com.team1.monew.comment.mapper.CommentLikeMapper;
 import com.team1.monew.comment.repository.CommentLikeRepository;
 import com.team1.monew.comment.repository.CommentRepository;
@@ -13,6 +14,7 @@ import com.team1.monew.user.repository.UserRepository;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,8 @@ public class CommentLikeServiceImpl implements CommentLikeService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final CommentLikeMapper commentLikeMapper;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     @Override
@@ -76,6 +80,8 @@ public class CommentLikeServiceImpl implements CommentLikeService {
 
         CommentLikeDto dto = commentLikeMapper.toDto(savedCommentLike, likeCount);
         log.debug("댓글 좋아요 DTO 반환 - {}", dto);
+
+        eventPublisher.publishEvent(new CommentLikedEvent(comment, likedBy));
 
         return dto;
     }
