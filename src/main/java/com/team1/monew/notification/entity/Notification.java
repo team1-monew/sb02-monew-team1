@@ -3,6 +3,7 @@ package com.team1.monew.notification.entity;
 import com.team1.monew.user.entity.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.Builder;
 import lombok.Getter;
 
 @Entity
@@ -53,16 +54,13 @@ public class Notification {
     protected Notification() {
     }
 
+    @Builder
     public Notification(User user, String content, String resourceType, Long resourceId) {
         this.user = user;
         this.content = content;
         this.resourceType = resourceType;
         this.resourceId = resourceId;
         this.confirmed = false;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
     }
-
-
 }
 
