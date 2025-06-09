@@ -18,6 +18,7 @@ import com.team1.monew.common.dto.CursorPageResponse;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -26,6 +27,7 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
@@ -185,6 +187,21 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
                     asc ? article.id.asc() : article.id.desc()
             };
         };
+    }
+
+    @Override
+    public List<ArticleDto> findAllCreatedYesterday() {
+        LocalDateTime start = LocalDate.now().minusDays(1).atStartOfDay();
+        LocalDateTime end = LocalDate.now().minusDays(1).atTime(23, 59, 59, 999999999);
+
+        List<Article> articles = queryFactory
+                .selectFrom(article)
+                .where(article.createdAt.between(start, end))
+                .fetch();
+
+        return articles.stream()
+                .map(a -> ArticleMapper.toDto(a, 0L, false))
+                .toList();
     }
 }
 
