@@ -4,6 +4,7 @@ import com.team1.monew.comment.dto.CommentLikeActivityDto;
 import com.team1.monew.comment.dto.CommentLikeDto;
 import com.team1.monew.comment.entity.Comment;
 import com.team1.monew.comment.entity.CommentLike;
+import com.team1.monew.comment.event.CommentLikedEvent;
 import com.team1.monew.comment.event.CommentLikeActivityCreatedEvent;
 import com.team1.monew.comment.event.CommentLikeActivityDeletedEvent;
 import com.team1.monew.comment.mapper.CommentLikeMapper;
@@ -97,6 +98,8 @@ public class CommentLikeServiceImpl implements CommentLikeService {
             .build();
 
         eventPublisher.publishEvent(new CommentLikeActivityCreatedEvent(eventDto, userId));
+
+        eventPublisher.publishEvent(new CommentLikedEvent(comment, likedBy));
 
         return dto;
     }
