@@ -20,4 +20,6 @@ public interface ArticleRepositoryCustom {
             String after,
             Long userId
     );
+
+    List<ArticleDto> findAllCreatedYesterday();
 }
