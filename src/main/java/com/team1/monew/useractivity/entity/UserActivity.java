@@ -1,38 +1,48 @@
 package com.team1.monew.useractivity.entity;
 
+import com.team1.monew.article.dto.ArticleViewDto;
+import com.team1.monew.comment.dto.CommentActivityDto;
+import com.team1.monew.comment.dto.CommentDto;
+import com.team1.monew.comment.dto.CommentLikeActivityDto;
+import com.team1.monew.comment.entity.Comment;
+import com.team1.monew.subscription.dto.SubscriptionDto;
+import com.team1.monew.user.dto.UserDto;
 import com.team1.monew.user.entity.User;
 import jakarta.persistence.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "user_activities")
+
+@Document(collection = "user_activities")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor
 @Getter
 public class UserActivity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private User user;
+    private UserDto user;
 
+    private List<CommentActivityDto> commentList = new ArrayList<>();
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private List<CommentLikeActivityDto> commentLikeList = new ArrayList<>();
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+    private List<ArticleViewDto> articleViewList = new ArrayList<>();
 
-    protected UserActivity() {
-    }
+    private List<SubscriptionDto> subscriptionList = new ArrayList<>();
 
-    public UserActivity(User user, String actionType, String description) {
-        this.user = user;
-        this.createdAt = LocalDateTime.now();
-    }
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
+    private LocalDateTime updateAt;
 }
