@@ -8,6 +8,7 @@ import com.team1.monew.article.collector.ChosunNewsCollector;
 import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.article.dto.ArticleViewDto;
 import com.team1.monew.article.entity.*;
+import com.team1.monew.article.event.NewArticlesCollectedEvent;
 import com.team1.monew.article.mapper.ArticleMapper;
 import com.team1.monew.article.event.ArticleViewCreateEvent;
 import com.team1.monew.article.mapper.ArticleViewMapper;
@@ -58,6 +59,8 @@ public class ArticleServiceImpl implements ArticleService {
 
   private final ApplicationEventPublisher eventPublisher;
 
+  private final ApplicationEventPublisher eventPublisher;
+
   @Transactional
   public void collectAndSaveNaverArticles(Interest interest, Keyword keyword) {
     log.info("📝 네이버 기사 수집 시작: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
@@ -69,6 +72,8 @@ public class ArticleServiceImpl implements ArticleService {
     saveArticles(collectedArticles, interest);
 
     log.info("📝 네이버 기사 저장 완료: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
+
+    eventPublisher.publishEvent(new NewArticlesCollectedEvent(interest, collectedArticles));
   }
 
   @Transactional
@@ -89,6 +94,8 @@ public class ArticleServiceImpl implements ArticleService {
     saveArticles(filtered, interest);
 
     log.info("📝 조선일보 기사 저장 완료: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
+
+    eventPublisher.publishEvent(new NewArticlesCollectedEvent(interest, collectedArticles));
   }
 
   private void saveArticles(List<CollectedArticleDto> collectedArticles, Interest interest) {

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 import com.team1.monew.comment.entity.Comment;
+import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.notification.dto.ResourceType;
 import com.team1.monew.notification.entity.Notification;
 import com.team1.monew.notification.repository.NotificationRepository;
@@ -23,6 +24,27 @@ class NotificationServiceImplTest {
 
   @InjectMocks
   NotificationServiceImpl notificationService;
+
+  @Test
+  void notifyNewArticles() {
+    // given
+    User subscriber = User.builder().build();
+    Interest interest = new Interest("관심사1");
+    ReflectionTestUtils.setField(interest, "id", 1L);
+    int articleCount = 1;
+
+    // when
+    notificationService.notifyNewArticles(subscriber, interest, articleCount);
+
+    // then
+    ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+    verify(notificationRepository).save(captor.capture());
+
+    Notification saved = captor.getValue();
+    assertThat(saved.getUser()).isEqualTo(subscriber);
+    assertThat(saved.getResourceType()).isEqualTo(ResourceType.INTEREST.getName());
+    assertThat(saved.getResourceId()).isEqualTo(interest.getId());
+  }
 
   @Test
   void notifyCommentLiked() {
