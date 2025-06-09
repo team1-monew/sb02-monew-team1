@@ -6,6 +6,7 @@ import com.team1.monew.article.collector.ChosunNewsCollector;
 import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.article.dto.ArticleViewDto;
 import com.team1.monew.article.entity.*;
+import com.team1.monew.article.event.NewArticlesCollectedEvent;
 import com.team1.monew.article.mapper.ArticleViewMapper;
 import com.team1.monew.article.repository.ArticleInterestRepository;
 import com.team1.monew.article.repository.ArticleRepository;
@@ -20,6 +21,7 @@ import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.interest.entity.Keyword;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -46,6 +48,8 @@ public class ArticleServiceImpl implements ArticleService {
   private final NewsCollector naverNewsCollector;
   private final ChosunNewsCollector chosunNewsCollector;
 
+  private final ApplicationEventPublisher eventPublisher;
+
   @Transactional
   public void collectAndSaveNaverArticles(Interest interest, Keyword keyword) {
     log.info("📝 네이버 기사 수집 시작: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
@@ -57,6 +61,8 @@ public class ArticleServiceImpl implements ArticleService {
     saveArticles(collectedArticles, interest);
 
     log.info("📝 네이버 기사 저장 완료: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
+
+    eventPublisher.publishEvent(new NewArticlesCollectedEvent(interest, collectedArticles));
   }
 
   @Transactional
@@ -77,6 +83,8 @@ public class ArticleServiceImpl implements ArticleService {
     saveArticles(filtered, interest);
 
     log.info("📝 조선일보 기사 저장 완료: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
+
+    eventPublisher.publishEvent(new NewArticlesCollectedEvent(interest, collectedArticles));
   }
 
   private void saveArticles(List<CollectedArticleDto> collectedArticles, Interest interest) {
