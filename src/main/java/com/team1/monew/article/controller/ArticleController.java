@@ -119,12 +119,21 @@ public class ArticleController {
 
   @GetMapping("/restore")
   public ResponseEntity<Void> restoreArticles(
-      @RequestParam LocalDateTime from,
-      @RequestParam LocalDateTime to) {
+          @RequestParam(required = false) String from,
+          @RequestParam(required = false) String to) {
 
-    articleService.restoreArticles(from, to);
+    log.info("🛠️ 기사 복구 요청 시작: from = {}, to = {}", from, to);
 
-    return ResponseEntity.ok().build();
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    LocalDateTime fromDate = parseStartDate(from, formatter);
+    LocalDateTime toDate = parseEndDate(to, formatter);
+
+    log.info("🛠️ 기사 복구 요청 완료: from = {}, to = {}", fromDate, toDate);
+
+    articleService.restoreArticles(fromDate, toDate);
+
+    return ResponseEntity.noContent().build();
   }
 
   @DeleteMapping("/{articleId}")
