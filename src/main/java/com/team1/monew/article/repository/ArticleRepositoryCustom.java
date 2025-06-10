@@ -3,7 +3,7 @@ package com.team1.monew.article.repository;
 import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.common.dto.CursorPageResponse;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ArticleRepositoryCustom {
@@ -11,8 +11,8 @@ public interface ArticleRepositoryCustom {
             String keyword,
             Long interestId,
             List<String> sourceIn,
-            LocalDate publishDateFrom,
-            LocalDate publishDateTo,
+            LocalDateTime publishDateFrom,
+            LocalDateTime publishDateTo,
             String orderBy,
             String direction,
             String cursor,

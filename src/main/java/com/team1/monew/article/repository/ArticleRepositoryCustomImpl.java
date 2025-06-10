@@ -8,15 +8,13 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.team1.monew.article.dto.ArticleDto;
-import com.team1.monew.article.entity.Article;
-import com.team1.monew.article.entity.QArticle;
-import com.team1.monew.article.entity.QArticleInterest;
-import com.team1.monew.article.entity.QArticleView;
+import com.team1.monew.article.entity.*;
 import com.team1.monew.article.mapper.ArticleMapper;
 import com.team1.monew.comment.entity.QComment;
 import com.team1.monew.common.dto.CursorPageResponse;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
+import com.team1.monew.interest.repository.InterestRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -44,8 +42,8 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
             String keyword,
             Long interestId,
             List<String> sourceIn,
-            LocalDate publishDateFrom,
-            LocalDate publishDateTo,
+            LocalDateTime publishDateFrom,
+            LocalDateTime publishDateTo,
             String orderBy,
             String direction,
             String cursor,
@@ -75,11 +73,11 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
         }
 
         if (publishDateFrom != null) {
-            where.and(article.publishDate.goe(publishDateFrom.atStartOfDay()));
+            where.and(article.publishDate.goe(publishDateFrom));
         }
 
         if (publishDateTo != null) {
-            where.and(article.publishDate.loe(publishDateTo.atTime(23, 59, 59)));
+            where.and(article.publishDate.loe(publishDateTo));
         }
 
         boolean asc = "ASC".equalsIgnoreCase(direction);
@@ -204,4 +202,3 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
                 .toList();
     }
 }
-
