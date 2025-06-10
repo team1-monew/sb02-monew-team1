@@ -1,20 +1,29 @@
 package com.team1.monew.notification.service;
 
 import com.team1.monew.comment.entity.Comment;
+import com.team1.monew.common.dto.CursorPageResponse;
 import com.team1.monew.interest.entity.Interest;
+import com.team1.monew.notification.dto.NotificationCursorRequest;
+import com.team1.monew.notification.dto.NotificationDto;
 import com.team1.monew.notification.dto.ResourceType;
 import com.team1.monew.notification.entity.Notification;
+import com.team1.monew.notification.mapper.NotificationPageResponseMapper;
 import com.team1.monew.notification.repository.NotificationRepository;
 import com.team1.monew.user.entity.User;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class NotificationServiceImpl implements NotificationService {
   private final NotificationRepository notificationRepository;
+  private final NotificationPageResponseMapper notificationPageResponseMapper;
 
   @Override
   public void notifyNewArticles(User user, Interest interest, int articleCount) {
@@ -44,5 +53,25 @@ public class NotificationServiceImpl implements NotificationService {
 
     log.info("댓글 좋아요 알림 생성 - 댓글 ID: {}, 좋아요 누른 사용자 ID: {}, 수신자 사용자 ID: {}",
         comment.getId(), likedBy.getId(), comment.getUser().getId());
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public CursorPageResponse<NotificationDto> getAllNotifications(
+      NotificationCursorRequest request) {
+
+    Slice<NotificationDto> result = notificationRepository.getAllByCursorRequest(request);
+
+    log.info("알림 조회 - userId: {}, cursor: {}, after: {}, direction: {}, limit: {}, resultSize: {}, hasNext: {}",
+        request.userId(),
+        request.cursor(),
+        request.after(),
+        request.direction(),
+        request.limit(),
+        result.getContent().size(),
+        result.hasNext()
+    );
+
+    return notificationPageResponseMapper.toPageResponse(result.getContent(), request, result.hasNext());
   }
 }
