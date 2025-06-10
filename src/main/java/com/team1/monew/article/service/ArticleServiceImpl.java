@@ -22,7 +22,6 @@ import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.*;
 
 import lombok.RequiredArgsConstructor;
@@ -150,8 +149,8 @@ public class ArticleServiceImpl implements ArticleService {
           String keyword,
           Long interestId,
           List<String> sourceIn,
-          LocalDate publishDateFrom,
-          LocalDate publishDateTo,
+          LocalDateTime publishDateFrom,
+          LocalDateTime publishDateTo,
           String orderBy,
           String direction,
           String cursor,
