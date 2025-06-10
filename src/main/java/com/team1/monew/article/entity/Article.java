@@ -64,10 +64,6 @@ public class Article {
         this.isDeleted = true;
     }
 
-    public void restore() {
-        this.isDeleted = false;
-    }
-
     public void increaseViewCount() {
         this.viewCount++;
     }
