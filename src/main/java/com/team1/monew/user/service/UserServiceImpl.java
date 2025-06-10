@@ -13,10 +13,13 @@ import com.team1.monew.user.dto.UserUpdateRequest;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.mapper.UserMapper;
 import com.team1.monew.user.repository.UserRepository;
+import com.team1.monew.useractivity.entity.UserActivity;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +34,7 @@ public class UserServiceImpl implements UserService {
   private final SubscriptionRepository subscriptionRepository;
   private final CommentLikeCountService commentLikeCountService;
   private final UserMapper userMapper;
+  private final MongoTemplate mongoTemplate;
 
   @Override
   public UserDto createUser(UserRegisterRequest userRegisterRequest) {
@@ -49,6 +53,16 @@ public class UserServiceImpl implements UserService {
     user = userRepository.save(user);
     log.info("사용자 생성 완료: id={}, email={}, nickname={}", user.getId(), user.getEmail(),
         user.getNickname());
+
+    UserActivity userActivity = UserActivity.builder()
+        .id(user.getId())
+        .user(userMapper.toDto(user))
+        .createdAt(LocalDateTime.now())
+        .updateAt(LocalDateTime.now())
+        .build();
+
+    mongoTemplate.insert(userActivity);
+
     return userMapper.toDto(user);
   }
 
