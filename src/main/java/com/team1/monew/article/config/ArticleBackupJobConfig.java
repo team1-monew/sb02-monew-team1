@@ -76,11 +76,6 @@ public class ArticleBackupJobConfig {
         return articles -> {
             String key = "backup/articles/backup-articles-" + LocalDate.now().minusDays(1) + ".json";
 
-            if (s3Util.isBackupExists(key)) {
-                log.info("⏭️ 백업 파일이 이미 존재하여 건너뜁니다. key={}", key);
-                return;
-            }
-
             try {
                 log.info("📦 배치 백업 파일 업로드 시작: key={}", key);
                 String json = objectMapper.writeValueAsString(articles);

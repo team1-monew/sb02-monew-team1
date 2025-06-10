@@ -4,23 +4,18 @@ import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.article.dto.ArticleViewDto;
 import com.team1.monew.article.service.ArticleService;
 import com.team1.monew.common.dto.CursorPageResponse;
-import com.team1.monew.exception.ErrorCode;
-import com.team1.monew.exception.RestException;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/articles")
@@ -62,10 +57,10 @@ public class ArticleController {
     log.info("📝 기사 목록 조회 요청 시작: keyword={}, interestId={}, sourceIn={}, publishDateFrom={}, publishDateTo={}, orderBy={}, direction={}, cursor={}, limit={}, after={}, userId={}",
             keyword, interestId, sourceIn, publishDateFrom, publishDateTo, orderBy, direction, cursor, limit, after, userId);
 
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    LocalDate fromDate = parseDateSafely(publishDateFrom, formatter);
-    LocalDate toDate = parseDateSafely(publishDateTo, formatter);
+    LocalDateTime fromDate = parseStartDate(publishDateFrom, formatter);
+    LocalDateTime toDate = parseEndDate(publishDateTo, formatter);
 
     CursorPageResponse<ArticleDto> response = articleService.getArticles(
             keyword,
@@ -86,15 +81,30 @@ public class ArticleController {
     return ResponseEntity.ok(response);
   }
 
-  private LocalDate parseDateSafely(String rawDate, DateTimeFormatter formatter) {
+  private LocalDateTime parseStartDate(String rawDate, DateTimeFormatter formatter) {
     if (rawDate == null || rawDate.isBlank()) return null;
+
     try {
-      return LocalDateTime.parse(rawDate, formatter).toLocalDate();
+      LocalDate date = LocalDate.parse(rawDate, formatter);
+      return date.atStartOfDay(); // 00:00:00
     } catch (DateTimeParseException e) {
       log.warn("⚠️ 날짜 파싱 실패: 입력값 = '{}', 예외 메시지 = {}", rawDate, e.getMessage());
       return null;
     }
   }
+
+  private LocalDateTime parseEndDate(String rawDate, DateTimeFormatter formatter) {
+    if (rawDate == null || rawDate.isBlank()) return null;
+
+    try {
+      LocalDate date = LocalDate.parse(rawDate, formatter);
+      return date.atTime(23, 59, 59); // 23:59:59
+    } catch (DateTimeParseException e) {
+      log.warn("⚠️ 날짜 파싱 실패: 입력값 = '{}', 예외 메시지 = {}", rawDate, e.getMessage());
+      return null;
+    }
+  }
+
 
   @GetMapping("/sources")
   public ResponseEntity<List<String>> getSources() {
