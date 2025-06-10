@@ -20,13 +20,15 @@ public class ArticleMapper {
         .build();
   }
 
-  public static Article toEntity(ArticleDto dto) {
+  public static Article toRestoredEntity(ArticleDto dto) {
     return Article.builder()
         .source(dto.source())
         .sourceUrl(dto.sourceUrl())
         .title(dto.title())
         .publishDate(dto.publishDate())
         .summary(dto.summary())
+        .viewCount(0L)
+        .isDeleted(false)
         .createdAt(LocalDateTime.now())
         .build();
   }
