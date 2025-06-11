@@ -12,4 +12,5 @@ public interface NotificationService {
   void notifyCommentLiked(Comment comment, User likedBy);
   CursorPageResponse<NotificationDto> getAllNotifications(NotificationCursorRequest request);
   void confirmAll(Long userId);
+  void confirm(Long notificationId);
 }
