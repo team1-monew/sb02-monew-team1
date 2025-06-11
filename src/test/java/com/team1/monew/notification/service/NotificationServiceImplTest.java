@@ -109,7 +109,7 @@ class NotificationServiceImplTest {
             .resourceType(ResourceType.COMMENT.getName())
             .resourceId(null)
             .build()
-        );
+    );
 
     Slice<NotificationDto> slice = new SliceImpl<>(dtoList, PageRequest.of(0, request.limit()), false);
 
@@ -141,5 +141,17 @@ class NotificationServiceImplTest {
 
     // then
     verify(notificationRepository, times(1)).markAllAsConfirmedByUserId(userId);
+  }
+
+  @Test
+  void confirm() {
+    // given
+    Long notificationId = 1L;
+
+    // when
+    notificationService.confirm(notificationId);
+
+    // then
+    verify(notificationRepository, times(1)).markAsConfirmedByNotificationId(notificationId);
   }
 }
