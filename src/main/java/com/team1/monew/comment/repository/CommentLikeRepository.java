@@ -28,7 +28,17 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> 
         WHERE cl.likedBy.id = :userId
         ORDER BY cl.createdAt DESC
         """)
-    List<CommentLike> findWithCommentByLikedById(@Param("userId") Long userId, Pageable pageable);
+    List<CommentLike> findTop10WithCommentByLikedById(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("""
+        SELECT cl
+        FROM CommentLike cl
+        JOIN FETCH cl.comment c
+        JOIN FETCH c.article
+        WHERE cl.likedBy.id = :userId
+        ORDER BY cl.createdAt DESC
+        """)
+    List<CommentLike> findWithCommentByLikedById(@Param("userId") Long userId);
 
 
 }
