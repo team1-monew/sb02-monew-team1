@@ -11,7 +11,6 @@ import com.team1.monew.subscription.mapper.SubscriptionMapper;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.useractivity.dto.UserActivityDto;
 import com.team1.monew.useractivity.dto.UserActivityParam;
-import com.team1.monew.useractivity.entity.UserActivity;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -23,19 +22,6 @@ public class UserActivityMapper {
   private final CommentLikeMapper commentLikeMapper;
   private final SubscriptionMapper subscriptionMapper;
 
-
-  public UserActivityDto toQueryDto(UserActivity userActivity){
-    return UserActivityDto.builder()
-        .id(userActivity.getId())
-        .email(userActivity.getUser().email())
-        .nickname(userActivity.getUser().nickname())
-        .createdAt(userActivity.getUser().createdAt())
-        .subscriptions(userActivity.getSubscriptionList())
-        .comments(userActivity.getCommentList())
-        .commentLikes(userActivity.getCommentLikeList())
-        .articleViews(userActivity.getArticleViewList())
-        .build();
-  }
 
   public UserActivityDto toDto(UserActivityParam userActivityParam) {
 

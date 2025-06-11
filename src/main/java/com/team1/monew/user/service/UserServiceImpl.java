@@ -13,8 +13,10 @@ import com.team1.monew.user.dto.UserUpdateRequest;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.mapper.UserMapper;
 import com.team1.monew.user.repository.UserRepository;
-import com.team1.monew.useractivity.entity.UserActivity;
+import com.team1.monew.useractivity.document.ArticleViewActivity;
+import com.team1.monew.useractivity.document.SubscriptionActivity;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -54,14 +56,22 @@ public class UserServiceImpl implements UserService {
     log.info("사용자 생성 완료: id={}, email={}, nickname={}", user.getId(), user.getEmail(),
         user.getNickname());
 
-    UserActivity userActivity = UserActivity.builder()
-        .id(user.getId())
-        .user(userMapper.toDto(user))
+    SubscriptionActivity subscriptionActivity = SubscriptionActivity.builder()
+        .userId(user.getId())
+        .subscriptions(new ArrayList<>())
         .createdAt(LocalDateTime.now())
-        .updateAt(LocalDateTime.now())
+        .updatedAt(LocalDateTime.now())
         .build();
 
-    mongoTemplate.insert(userActivity);
+    ArticleViewActivity articleViewActivity = ArticleViewActivity.builder()
+        .userId(user.getId())
+        .articleViews(new ArrayList<>())
+        .createdAt(LocalDateTime.now())
+        .updatedAt(LocalDateTime.now())
+        .build();
+
+    mongoTemplate.insert(subscriptionActivity);
+    mongoTemplate.insert(articleViewActivity);
 
     return userMapper.toDto(user);
   }
