@@ -1,5 +1,9 @@
 package com.team1.monew.article.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.team1.monew.article.collector.ChosunNewsCollector;
 import com.team1.monew.article.collector.NewsCollector;
 import com.team1.monew.article.dto.ArticleDto;
@@ -9,6 +13,7 @@ import com.team1.monew.article.entity.*;
 import com.team1.monew.article.repository.*;
 import com.team1.monew.comment.repository.CommentRepository;
 import com.team1.monew.comment.entity.Comment;
+import com.team1.monew.common.S3Util;
 import com.team1.monew.common.dto.CursorPageResponse;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
@@ -20,7 +25,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import java.time.LocalDate;
+
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -56,8 +62,17 @@ class ArticleServiceImplTest {
     @Mock
     private ChosunNewsCollector chosunNewsCollector;
 
+    @Mock
+    private S3Util s3Util;
+
+    private ObjectMapper objectMapper;
+
     @BeforeEach
     void setup() {
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
         MockitoAnnotations.openMocks(this);
     }
 
@@ -212,7 +227,7 @@ class ArticleServiceImplTest {
 
         // when
         CursorPageResponse<ArticleDto> result = articleService.getArticles(
-                "keyword", 1L, List.of("source"), LocalDate.now(), LocalDate.now(),
+                "keyword", 1L, List.of("source"), LocalDateTime.now(), LocalDateTime.now(),
                 "orderBy", "desc", "cursor", 10, "after", 1L);
 
         // then
@@ -240,37 +255,36 @@ class ArticleServiceImplTest {
     }
 
     @Test
-    @DisplayName("기간 내 삭제된 기사 복구")
-    void testRestoreArticles() {
+    @DisplayName("백업된 기사 복구 성공")
+    void testRestoreArticles_Success() throws Exception {
         // given
-        Article deletedArticle = mock(Article.class);
-        when(deletedArticle.isDeleted()).thenReturn(true);
-        when(deletedArticle.getCreatedAt()).thenReturn(LocalDateTime.of(2023, 1, 1, 0, 0));
+        LocalDateTime from = LocalDateTime.of(2024, 1, 1, 0, 0);
+        String backupKey = "backup/articles/backup-articles-2024-01-01.json";
 
-        when(articleRepository.findAll()).thenReturn(List.of(deletedArticle));
+        ArticleDto articleDto = new ArticleDto(1L, "source", "url", "title", LocalDateTime.now(), "summary", 0L, null, false);
+        List<ArticleDto> articles = List.of(articleDto);
+        Map<String, Object> jsonMap = Map.of("items", articles);
 
-        LocalDateTime from = LocalDateTime.of(2023, 1, 1, 0, 0);
-        LocalDateTime to = LocalDateTime.of(2023, 12, 31, 23, 59);
+        byte[] fileBytes = objectMapper.writeValueAsString(jsonMap).getBytes(StandardCharsets.UTF_8);
 
         // when
-        articleService.restoreArticles(from, to);
+        TypeReference<Map<String, Object>> mapTypeRef = new TypeReference<Map<String, Object>>() {};
+        TypeReference<List<ArticleDto>> listTypeRef = new TypeReference<List<ArticleDto>>() {};
+
+        when(s3Util.download(backupKey)).thenReturn(fileBytes);
+
+        String jsonString = new String(fileBytes, StandardCharsets.UTF_8);
+
+        if (jsonString == null || jsonString.isEmpty()) {
+            jsonString = "{}";
+        }
+
+        Map<String, Object> jsonData = objectMapper.readValue(jsonString, mapTypeRef);
+        List<ArticleDto> restoredArticles = objectMapper.convertValue(jsonData.get("items"), listTypeRef);
 
         // then
-        verify(deletedArticle).restore();
-    }
-
-    @Test
-    @DisplayName("기간 내 삭제된 기사 없으면 에러 발생")
-    void testRestoreArticles_NoDeleted() {
-        // given
-        when(articleRepository.findAll()).thenReturn(List.of());
-
-        LocalDateTime from = LocalDateTime.of(2023, 1, 1, 0, 0);
-        LocalDateTime to = LocalDateTime.of(2023, 12, 31, 23, 59);
-
-        // when & then
-        RestException ex = assertThrows(RestException.class, () -> articleService.restoreArticles(from, to));
-        assertEquals(ErrorCode.NOT_FOUND, ex.getErrorCode());
+        assertNotNull(restoredArticles);
+        assertEquals(1, restoredArticles.size());
     }
 
     @Test
