@@ -62,7 +62,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     Slice<NotificationDto> result = notificationRepository.getAllByCursorRequest(request);
 
-    log.info("알림 조회 - userId: {}, cursor: {}, after: {}, direction: {}, limit: {}, resultSize: {}, hasNext: {}",
+    log.info("알림 목록 불러오기 성공 - userId: {}, cursor: {}, after: {}, direction: {}, limit: {}, resultSize: {}, hasNext: {}",
         request.userId(),
         request.cursor(),
         request.after(),
@@ -73,5 +73,12 @@ public class NotificationServiceImpl implements NotificationService {
     );
 
     return notificationPageResponseMapper.toPageResponse(result.getContent(), request, result.hasNext());
+  }
+
+  @Override
+  public void confirmAll(Long userId) {
+    notificationRepository.markAllAsConfirmedByUserId(userId);
+
+    log.info("전체 알림 확인 완료 - userId : {}", userId);
   }
 }
