@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,6 +54,18 @@ public class NotificationController {
     log.info("알림 목록 전체 확인 요청 - userId: {}", userId);
 
     notificationService.confirmAll(userId);
+
+    return ResponseEntity.ok().build();
+  }
+
+  @PatchMapping("/{notificationId}")
+  public ResponseEntity<Void> markNotificationsAsRead(
+      @PathVariable Long notificationId,
+      @RequestHeader(value = "Monew-Request-User-ID") Long userId
+  ) {
+    log.info("알림 목록 확인 요청 - userId: {}", userId);
+
+    notificationService.confirm(notificationId);
 
     return ResponseEntity.ok().build();
   }
