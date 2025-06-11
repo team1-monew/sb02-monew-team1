@@ -23,6 +23,7 @@ public class UserActivityMapper {
   private final SubscriptionMapper subscriptionMapper;
 
 
+
   public UserActivityDto toDto(UserActivityParam userActivityParam) {
 
     List<SubscriptionDto> subscriptionDtoList = userActivityParam.subscriptions().stream()

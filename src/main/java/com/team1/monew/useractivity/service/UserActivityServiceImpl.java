@@ -1,71 +1,76 @@
 package com.team1.monew.useractivity.service;
 
-import com.team1.monew.article.entity.Article;
-import com.team1.monew.article.entity.ArticleView;
-import com.team1.monew.article.repository.ArticleRepository;
-import com.team1.monew.article.repository.ArticleViewRepository;
-import com.team1.monew.comment.entity.Comment;
-import com.team1.monew.comment.entity.CommentLike;
-import com.team1.monew.comment.repository.CommentLikeRepository;
-import com.team1.monew.comment.repository.CommentRepository;
+import com.team1.monew.article.dto.ArticleViewDto;
+import com.team1.monew.comment.dto.CommentActivityDto;
+import com.team1.monew.comment.dto.CommentLikeActivityDto;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
-import com.team1.monew.subscription.entity.Subscription;
-import com.team1.monew.subscription.repository.SubscriptionRepository;
+import com.team1.monew.subscription.dto.SubscriptionDto;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
+import com.team1.monew.useractivity.document.ArticleViewActivity;
+import com.team1.monew.useractivity.document.CommentActivity;
+import com.team1.monew.useractivity.document.CommentLikeActivity;
+import com.team1.monew.useractivity.document.SubscriptionActivity;
 import com.team1.monew.useractivity.dto.UserActivityDto;
-import com.team1.monew.useractivity.dto.UserActivityParam;
-import com.team1.monew.useractivity.mapper.UserActivityMapper;
+import com.team1.monew.useractivity.repository.ArticleViewActivityRepository;
+import com.team1.monew.useractivity.repository.CommentActivityRepository;
+import com.team1.monew.useractivity.repository.CommentLikeActivityRepository;
+import com.team1.monew.useractivity.repository.SubscriptionActivityRepository;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
-public class UserActivityServiceImpl implements UserActivityService {
+@AllArgsConstructor
+@Primary
+public class UserActivityServiceImpl implements UserActivityService{
 
-  private final SubscriptionRepository subscriptionRepository;
-  private final CommentRepository commentRepository;
-  private final CommentLikeRepository commentLikeRepository;
-  private final ArticleRepository articleRepository;
-  private final ArticleViewRepository articleViewRepository;
-  private final UserRepository userRepository;
+    private final CommentActivityRepository commentActivityRepository;
+    private final CommentLikeActivityRepository commentLikeActivityRepository;
+    private final ArticleViewActivityRepository articleViewActivityRepository;
+    private final SubscriptionActivityRepository subscriptionActivityRepository;
+    private final UserRepository userRepository;
 
-  private final UserActivityMapper userActivityMapper;
+    @Override
+    public UserActivityDto findUserActivity(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> {
+            log.warn("활동 내역 조회 실패 - 해당 유저가 존재하지 않음, userId: {}", userId);
+        return new RestException(ErrorCode.NOT_FOUND,
+            Map.of("userId", userId, "detail", "user not found"));
+            });
 
+        List<CommentActivityDto> comments = commentActivityRepository.findTop10CommentsByUserId(userId)
+            .map(CommentActivity::getComments)
+            .orElse(Collections.emptyList());
 
-  @Transactional
-  @Override
-  public UserActivityDto findUserActivity(Long userId) {
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> {
-          log.warn("활동내역 조회 실패 - 해당 유저가 존재하지 않음, userId: {}", userId);
-          return new RestException(ErrorCode.NOT_FOUND,
-              Map.of("userId", userId, "detail", "user not found"));
-        });
-    List<Subscription> subscriptionList = subscriptionRepository.findByUserIdFetch(userId);
-    List<ArticleView> articleViewList = articleViewRepository.findTop10ArticleViewByUserId(userId,
-        PageRequest.of(0, 10));
-    List<Comment> top10CommentByUserId = commentRepository.findTop10ByUser_IdAndIsDeletedFalseOrderByCreatedAtDesc(
-        userId);
-    List<CommentLike> top10CommentLikeByLike = commentLikeRepository.findWithCommentByLikedById(
-        userId,
-        PageRequest.of(0, 10));
+        List<CommentLikeActivityDto> commentLikes = commentLikeActivityRepository.findTop10CommentLikesByUserId(userId)
+            .map(CommentLikeActivity::getCommentLikes)
+            .orElse(Collections.emptyList());
 
-    UserActivityParam userActivityParam = UserActivityParam.builder()
-        .user(user)
-        .articleViews(articleViewList)
-        .commentLikes(top10CommentLikeByLike)
-        .recentComments(top10CommentByUserId)
-        .subscriptions(subscriptionList)
-        .build();
+        List<SubscriptionDto> subscriptions = subscriptionActivityRepository.findTop10SubscriptionsByUserId(userId)
+            .map(SubscriptionActivity::getSubscriptions)
+            .orElse(Collections.emptyList());
 
-    return userActivityMapper.toDto(userActivityParam);
-  }
+        List<ArticleViewDto> articleViews = articleViewActivityRepository.findTop10ArticleViewsByUserId(userId)
+            .map(ArticleViewActivity::getArticleViews)
+            .orElse(Collections.emptyList());
+
+        return UserActivityDto.builder()
+            .id(user.getId())
+            .email(user.getEmail())
+            .nickname(user.getNickname())
+            .articleViews(articleViews)
+            .commentLikes(commentLikes)
+            .subscriptions(subscriptions)
+            .comments(comments)
+            .createdAt(LocalDateTime.now())
+            .build();
+    }
 }
