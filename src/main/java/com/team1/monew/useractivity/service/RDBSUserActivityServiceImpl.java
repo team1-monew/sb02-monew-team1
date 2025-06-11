@@ -1,7 +1,6 @@
 package com.team1.monew.useractivity.service;
 
 import com.team1.monew.article.entity.ArticleView;
-import com.team1.monew.article.repository.ArticleRepository;
 import com.team1.monew.article.repository.ArticleViewRepository;
 import com.team1.monew.comment.entity.Comment;
 import com.team1.monew.comment.entity.CommentLike;
@@ -32,7 +31,6 @@ public class RDBSUserActivityServiceImpl implements UserActivityService {
   private final SubscriptionRepository subscriptionRepository;
   private final CommentRepository commentRepository;
   private final CommentLikeRepository commentLikeRepository;
-  private final ArticleRepository articleRepository;
   private final ArticleViewRepository articleViewRepository;
   private final UserRepository userRepository;
 
@@ -52,8 +50,9 @@ public class RDBSUserActivityServiceImpl implements UserActivityService {
     List<ArticleView> articleViewList = articleViewRepository.findTop10ArticleViewByUserId(userId,
         PageRequest.of(0, 10));
     List<Comment> top10CommentByUserId = commentRepository.findTop10ByUser_IdAndIsDeletedFalseOrderByCreatedAtDesc(
-        userId);
-    List<CommentLike> top10CommentLikeByLike = commentLikeRepository.findWithCommentByLikedById(
+        userId,
+        PageRequest.of(0, 10));
+    List<CommentLike> top10CommentLikeByLike = commentLikeRepository.findTop10WithCommentByLikedById(
         userId,
         PageRequest.of(0, 10));
 
