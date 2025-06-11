@@ -2,11 +2,14 @@ package com.team1.monew.comment.service;
 
 import com.team1.monew.article.entity.Article;
 import com.team1.monew.article.repository.ArticleRepository;
+import com.team1.monew.comment.dto.CommentActivityDto;
 import com.team1.monew.comment.dto.CommentDto;
 import com.team1.monew.comment.dto.CommentRegisterRequest;
 import com.team1.monew.comment.dto.CommentSearchCondition;
 import com.team1.monew.comment.dto.CommentUpdateRequest;
 import com.team1.monew.comment.entity.Comment;
+import com.team1.monew.comment.event.CommentActivityCreatedEvent;
+import com.team1.monew.comment.event.CommentActivityDeletedEvent;
 import com.team1.monew.comment.mapper.CommentMapper;
 import com.team1.monew.comment.mapper.CommentPageResponseMapper;
 import com.team1.monew.comment.repository.CommentLikeRepository;
@@ -21,6 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +40,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
     private final CommentPageResponseMapper pageResponseMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
 
     @Transactional
@@ -81,6 +86,19 @@ public class CommentServiceImpl implements CommentService {
 
         CommentDto dto = commentMapper.toDto(savedComment, likedByMe);
         log.debug("댓글 DTO 반환 - {}", dto);
+
+        CommentActivityDto event = CommentActivityDto.builder()
+            .id(savedComment.getId())
+            .articleId(article.getId())
+            .articleTitle(article.getTitle())
+            .userId(user.getId())
+            .userNickname(user.getNickname())
+            .content(savedComment.getContent())
+            .likeCount(0L)
+            .createdAt(savedComment.getCreatedAt())
+            .build();
+
+        eventPublisher.publishEvent(new CommentActivityCreatedEvent(event));
 
         return dto;
     }
@@ -151,6 +169,8 @@ public class CommentServiceImpl implements CommentService {
         }
 
         comment.delete();
+
+        eventPublisher.publishEvent(new CommentActivityDeletedEvent(userId, commentId));
 
         log.info("댓글 소프트 삭제 완료 - commentId: {}", commentId);
     }

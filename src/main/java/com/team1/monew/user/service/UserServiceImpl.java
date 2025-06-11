@@ -15,6 +15,8 @@ import com.team1.monew.user.mapper.UserMapper;
 import com.team1.monew.user.repository.UserRepository;
 import com.team1.monew.useractivity.document.ArticleViewActivity;
 import com.team1.monew.useractivity.document.SubscriptionActivity;
+import com.team1.monew.useractivity.document.CommentActivity;
+import com.team1.monew.useractivity.document.CommentLikeActivity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +58,7 @@ public class UserServiceImpl implements UserService {
     log.info("사용자 생성 완료: id={}, email={}, nickname={}", user.getId(), user.getEmail(),
         user.getNickname());
 
+    // mongoDB
     SubscriptionActivity subscriptionActivity = SubscriptionActivity.builder()
         .userId(user.getId())
         .subscriptions(new ArrayList<>())
@@ -70,8 +73,24 @@ public class UserServiceImpl implements UserService {
         .updatedAt(LocalDateTime.now())
         .build();
 
+    CommentActivity commentActivity = CommentActivity.builder()
+        .userId(user.getId())
+        .comments(new ArrayList<>())
+        .createdAt(LocalDateTime.now())
+        .updatedAt(LocalDateTime.now())
+        .build();
+
+    CommentLikeActivity commentLikeActivity = CommentLikeActivity.builder()
+        .userId(user.getId())
+        .commentLikes(new ArrayList<>())
+        .createdAt(LocalDateTime.now())
+        .updatedAt(LocalDateTime.now())
+        .build();
+
     mongoTemplate.insert(subscriptionActivity);
     mongoTemplate.insert(articleViewActivity);
+    mongoTemplate.insert(commentActivity);
+    mongoTemplate.insert(commentLikeActivity);
 
     return userMapper.toDto(user);
   }
