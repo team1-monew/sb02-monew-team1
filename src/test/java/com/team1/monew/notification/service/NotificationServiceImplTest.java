@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.team1.monew.comment.entity.Comment;
@@ -128,5 +129,17 @@ class NotificationServiceImplTest {
     verify(notificationRepository).getAllByCursorRequest(request);
     verify(notificationPageResponseMapper)
         .toPageResponse(dtoList, request, false);
+  }
+
+  @Test
+  void confirmAll() {
+    // given
+    Long userId = 1L;
+
+    // when
+    notificationService.confirmAll(userId);
+
+    // then
+    verify(notificationRepository, times(1)).markAllAsConfirmedByUserId(userId);
   }
 }
