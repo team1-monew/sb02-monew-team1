@@ -36,6 +36,5 @@ public class ArticleViewEventListener {
             Filters.eq("_id", articleViewCreateEvent.userId()),
             update
         );
-    log.debug("=======================기사 읽기 이벤트 발행 성공==============================");
   }
 }
