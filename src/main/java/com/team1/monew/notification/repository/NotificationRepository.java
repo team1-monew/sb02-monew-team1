@@ -18,4 +18,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
       " WHERE n.user.id = :userId")
   void markAllAsConfirmedByUserId(@Param("userId") Long userId);
 
+  @Modifying(clearAutomatically = true)
+  @Transactional
+  @Query("UPDATE Notification n " +
+      " SET n.confirmed = true " +
+      " WHERE n.id = :notificationId")
+  void markAsConfirmedByNotificationId(@Param("notificationId") Long notificationId);
 }
