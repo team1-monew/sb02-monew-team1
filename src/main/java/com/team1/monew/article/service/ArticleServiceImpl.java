@@ -6,6 +6,7 @@ import com.team1.monew.article.collector.ChosunNewsCollector;
 import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.article.dto.ArticleViewDto;
 import com.team1.monew.article.entity.*;
+import com.team1.monew.article.event.ArticleViewCreateEvent;
 import com.team1.monew.article.mapper.ArticleViewMapper;
 import com.team1.monew.article.repository.ArticleInterestRepository;
 import com.team1.monew.article.repository.ArticleRepository;
@@ -20,6 +21,7 @@ import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.interest.entity.Keyword;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -45,6 +47,8 @@ public class ArticleServiceImpl implements ArticleService {
   private final CommentRepository commentRepository;
   private final NewsCollector naverNewsCollector;
   private final ChosunNewsCollector chosunNewsCollector;
+
+  private final ApplicationEventPublisher eventPublisher;
 
   @Transactional
   public void collectAndSaveNaverArticles(Interest interest, Keyword keyword) {
@@ -140,28 +144,34 @@ public class ArticleServiceImpl implements ArticleService {
 
     Long commentCount = commentRepository.countByArticleIdAndIsDeletedFalse(article.getId());
 
+    ArticleViewDto articleViewDto = ArticleViewMapper.toDto(articleView, commentCount);
+    eventPublisher.publishEvent(ArticleViewCreateEvent.builder()
+        .articleViewDto(articleViewDto)
+        .userId(userId)
+        .build());
+
     log.info("📝 기사 조회 완료: articleId = {}, userId = {}", articleId, userId);
-    return ArticleViewMapper.toDto(articleView, commentCount);
+    return articleViewDto;
   }
 
   @Override
   @Transactional(readOnly = true)
   public CursorPageResponse<ArticleDto> getArticles(
-          String keyword,
-          Long interestId,
-          List<String> sourceIn,
-          LocalDate publishDateFrom,
-          LocalDate publishDateTo,
-          String orderBy,
-          String direction,
-          String cursor,
-          int limit,
-          String after,
-          Long userId
+      String keyword,
+      Long interestId,
+      List<String> sourceIn,
+      LocalDate publishDateFrom,
+      LocalDate publishDateTo,
+      String orderBy,
+      String direction,
+      String cursor,
+      int limit,
+      String after,
+      Long userId
   ) {
     return articleRepositoryCustom.searchArticles(
-            keyword, interestId, sourceIn, publishDateFrom, publishDateTo,
-            orderBy, direction, cursor, limit, after, userId
+        keyword, interestId, sourceIn, publishDateFrom, publishDateTo,
+        orderBy, direction, cursor, limit, after, userId
     );
   }
 
@@ -204,6 +214,7 @@ public class ArticleServiceImpl implements ArticleService {
         .forEach(Comment::delete);
 
     article.markDeleted();
+
     log.info("📝 기사 삭제 처리 완료: {}", articleId);
   }
 
