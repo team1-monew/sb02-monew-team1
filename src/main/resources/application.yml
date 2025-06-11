@@ -1,3 +1,32 @@
 spring:
   application:
     name: monew
+
+  data:
+    mongodb:
+      uri: mongodb://mongodb:mongodb@localhost:27017/
+      database: mydb
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/localmonewdb
+    username: hi
+    password: hi
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate # 또는 create / create-drop / validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+    com.team1.monew.comment.service.CommentLikeServiceImpl: DEBUG
+
