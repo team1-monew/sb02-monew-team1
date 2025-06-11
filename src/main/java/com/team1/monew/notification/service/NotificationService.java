@@ -11,4 +11,5 @@ public interface NotificationService {
   void notifyNewArticles(User user, Interest interest, int articleCount);
   void notifyCommentLiked(Comment comment, User likedBy);
   CursorPageResponse<NotificationDto> getAllNotifications(NotificationCursorRequest request);
+  void confirmAll(Long userId);
 }
