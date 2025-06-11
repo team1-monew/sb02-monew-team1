@@ -1,6 +1,7 @@
 package com.team1.monew.subscription.event.listener;
 
 import com.team1.monew.subscription.event.SubscriptionCreateEvent;
+import com.team1.monew.subscription.event.SubscriptionDeleteEvent;
 import com.team1.monew.useractivity.document.SubscriptionActivity;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,18 @@ public class SubscriptionEventListener {
     Query query = Query.query(Criteria.where("_id").is(subscriptionCreateEvent.userId()));
     Update update = new Update()
         .push("subscriptions", subscriptionCreateEvent.subscriptionDto())
+        .set("updatedAt", LocalDateTime.now());
+    mongoTemplate.updateFirst(query, update, SubscriptionActivity.class);
+  }
+
+  @EventListener
+  @Async
+  public void handelSubscriptionDeleteEvent(SubscriptionDeleteEvent subscriptionDeleteEvent) {
+    Query query = Query.query(Criteria.where("_id").is(subscriptionDeleteEvent.userId()));
+    Update update = new Update()
+        .pull("subscriptions",
+            Query.query(Criteria.where("id").is(subscriptionDeleteEvent.subscriptionId()))
+                .getQueryObject())
         .set("updatedAt", LocalDateTime.now());
     mongoTemplate.updateFirst(query, update, SubscriptionActivity.class);
   }

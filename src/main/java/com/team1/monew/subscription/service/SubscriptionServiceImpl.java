@@ -7,6 +7,7 @@ import com.team1.monew.interest.repository.InterestRepository;
 import com.team1.monew.subscription.dto.SubscriptionDto;
 import com.team1.monew.subscription.entity.Subscription;
 import com.team1.monew.subscription.event.SubscriptionCreateEvent;
+import com.team1.monew.subscription.event.SubscriptionDeleteEvent;
 import com.team1.monew.subscription.mapper.SubscriptionMapper;
 import com.team1.monew.subscription.repository.SubscriptionRepository;
 import com.team1.monew.user.entity.User;
@@ -75,14 +76,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
               Map.of("interestId", interestId, "userId", userId, "detail",
                   "subscription not found"));
         });
-    subscriptionRepository.deleteById(subscription.getId());
+    Long subscriptionId = subscription.getId();
+    subscriptionRepository.deleteById(subscriptionId);
 
     interestRepository.decrementSubscriberCount(interestId);
 
-//    eventPublisher.publishEvent(SubscriptionDeleteEvent.builder()
-//        .subscriptionDto(subscriptionMapper.toDto(subscription))
-//        .userId(userId)
-//        .build());
+    eventPublisher.publishEvent(SubscriptionDeleteEvent.builder()
+        .subscriptionId(subscriptionId)
+        .userId(userId)
+        .build());
 
     log.info("관심사 구독 취소 완료 - interestId: {}, userId: {}", interestId, userId);
   }
