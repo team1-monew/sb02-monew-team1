@@ -65,4 +65,50 @@ class NotificationRepositoryTest {
     assertThat(all).hasSize(2);
     assertThat(all).allMatch(Notification::isConfirmed);
   }
+
+  @Test
+  @DisplayName("markAsConfirmedByNotificationId() 성공")
+  void markAsConfirmedByNotificationId_shouldUpdateConfirmedFieldToTrue() {
+    // given
+    User user = User.builder()
+        .email("test@example.com")
+        .nickname("testuser")
+        .password("testpassword")
+        .build();
+    entityManager.persist(user);
+
+
+    Notification notification1 = Notification.builder()
+        .user(user)
+        .content("알림1")
+        .resourceType(ResourceType.COMMENT.getName())
+        .resourceId(11L)
+        .build();
+    entityManager.persist(notification1);
+
+    Notification notification2 = Notification.builder()
+        .user(user)
+        .content("알림2")
+        .resourceType(ResourceType.COMMENT.getName())
+        .resourceId(12L)
+        .build();
+    entityManager.persist(notification2);
+
+    entityManager.flush();
+    entityManager.clear(); // 1차 캐시 제거
+
+    // when
+    notificationRepository.markAsConfirmedByNotificationId(notification1.getId());
+    entityManager.flush();
+    entityManager.clear(); // 다시 쿼리 실행하게끔 캐시 비움
+
+    // then
+    Notification updated = notificationRepository.findById(notification1.getId())
+        .orElseThrow();
+    Notification untouched = notificationRepository.findById(notification2.getId())
+        .orElseThrow();
+
+    assertThat(updated.isConfirmed()).isTrue();
+    assertThat(untouched.isConfirmed()).isFalse();
+  }
 }
