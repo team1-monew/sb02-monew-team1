@@ -81,4 +81,11 @@ public class NotificationServiceImpl implements NotificationService {
 
     log.info("전체 알림 확인 완료 - userId : {}", userId);
   }
+
+  @Override
+  public void confirm(Long notificationId) {
+    notificationRepository.markAsConfirmedByNotificationId(notificationId);
+
+    log.info("알림 확인 완료 - notificationId : {}", notificationId);
+  }
 }
