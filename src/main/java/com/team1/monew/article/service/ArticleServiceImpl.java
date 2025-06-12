@@ -157,8 +157,14 @@ public class ArticleServiceImpl implements ArticleService {
 
     Long commentCount = commentRepository.countByArticleIdAndIsDeletedFalse(article.getId());
 
+    ArticleViewDto articleViewDto = ArticleViewMapper.toDto(articleView, commentCount);
+    eventPublisher.publishEvent(ArticleViewCreateEvent.builder()
+        .articleViewDto(articleViewDto)
+        .userId(userId)
+        .build());
+
     log.info("📝 기사 조회 완료: articleId = {}, userId = {}", articleId, userId);
-    return ArticleViewMapper.toDto(articleView, commentCount);
+    return articleViewDto;
   }
 
   @Override
