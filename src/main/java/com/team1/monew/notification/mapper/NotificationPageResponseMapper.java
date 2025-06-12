@@ -36,7 +36,7 @@ public class NotificationPageResponseMapper {
         nextCursor,
         nextAfter,
         (long) request.limit(),
-        null,
+        (long) content.size(),
         hasNext
     );
   }
