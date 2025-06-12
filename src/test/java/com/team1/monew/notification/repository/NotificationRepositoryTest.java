@@ -6,6 +6,7 @@ import com.team1.monew.config.QueryDslConfig;
 import com.team1.monew.notification.dto.ResourceType;
 import com.team1.monew.notification.entity.Notification;
 import com.team1.monew.user.entity.User;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -110,5 +111,52 @@ class NotificationRepositoryTest {
 
     assertThat(updated.isConfirmed()).isTrue();
     assertThat(untouched.isConfirmed()).isFalse();
+  }
+
+  @Test
+  @DisplayName("confirmed=true이고 updatedAt이 cutoff 이전인 알림만 삭제되어야 한다")
+  void deleteConfirmedBefore_shouldDeleteOnlyMatching() {
+    // given: 다양한 상태의 알림을 저장
+    User user = User.builder()
+        .email("test@example.com")
+        .nickname("testuser")
+        .password("testpassword")
+        .build();
+    entityManager.persist(user);
+
+    Notification keep1 = Notification.builder()
+        .user(user)
+        .content("알림1")
+        .resourceType(ResourceType.COMMENT.getName())
+        .resourceId(11L)
+        .build();
+    entityManager.persist(keep1);
+    Notification keep2 = Notification.builder()
+        .user(user)
+        .content("알림2")
+        .resourceType(ResourceType.COMMENT.getName())
+        .resourceId(12L)
+        .build();
+    entityManager.persist(keep2);
+    Notification del1 = Notification.builder()
+        .user(user)
+        .content("알림3")
+        .resourceType(ResourceType.COMMENT.getName())
+        .resourceId(13L)
+        .build();
+    entityManager.persist(del1);
+
+    entityManager.flush();
+    entityManager.clear(); // 1차 캐시 제거
+
+    notificationRepository.markAsConfirmedByNotificationId(del1.getId());
+
+    // when: cutoff를 당일로 설정하고 삭제 호출
+    int deletedCount = notificationRepository.deleteConfirmedBefore(LocalDateTime.now());
+
+    // then: 딱 한 건만 삭제되고, 나머지는 그대로 남아 있어야 함
+    assertThat(deletedCount).isEqualTo(1);
+    List<Notification> remaining = notificationRepository.findAll();
+    assertThat(remaining.size()).isEqualTo(2);
   }
 }
