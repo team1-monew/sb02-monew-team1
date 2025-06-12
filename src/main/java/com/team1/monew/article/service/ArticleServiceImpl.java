@@ -9,6 +9,7 @@ import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.article.dto.ArticleViewDto;
 import com.team1.monew.article.entity.*;
 import com.team1.monew.article.mapper.ArticleMapper;
+import com.team1.monew.article.event.ArticleViewCreateEvent;
 import com.team1.monew.article.mapper.ArticleViewMapper;
 import com.team1.monew.article.repository.ArticleInterestRepository;
 import com.team1.monew.article.repository.ArticleRepository;
@@ -25,6 +26,7 @@ import com.team1.monew.interest.entity.Keyword;
 import com.team1.monew.interest.repository.InterestRepository;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
@@ -53,6 +55,8 @@ public class ArticleServiceImpl implements ArticleService {
   private final ChosunNewsCollector chosunNewsCollector;
   private final S3Util s3Util;
   private final ObjectMapper objectMapper;
+
+  private final ApplicationEventPublisher eventPublisher;
 
   @Transactional
   public void collectAndSaveNaverArticles(Interest interest, Keyword keyword) {
@@ -168,8 +172,8 @@ public class ArticleServiceImpl implements ArticleService {
           Long userId
   ) {
     return articleRepositoryCustom.searchArticles(
-            keyword, interestId, sourceIn, publishDateFrom, publishDateTo,
-            orderBy, direction, cursor, limit, after, userId
+        keyword, interestId, sourceIn, publishDateFrom, publishDateTo,
+        orderBy, direction, cursor, limit, after, userId
     );
   }
 
@@ -263,6 +267,7 @@ public class ArticleServiceImpl implements ArticleService {
         .forEach(Comment::delete);
 
     article.markDeleted();
+
     log.info("📝 기사 삭제 처리 완료: {}", articleId);
   }
 
