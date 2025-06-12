@@ -40,7 +40,7 @@ public class NotificationCleanupJobConfig {
         .<Integer, Integer>chunk(1, transactionManager)
         .reader(() -> {
           // 청크당 한 번만 실행하도록, 더이상 읽을 게 없으면 null 반환
-          LocalDateTime cutoff = LocalDateTime.now().minus(1, ChronoUnit.DAYS);
+          LocalDateTime cutoff = LocalDateTime.now().minus(7, ChronoUnit.DAYS);
           int deleted = notificationRepository.deleteConfirmedBefore(cutoff);
           log.info("1주일 지난 confirmed 알림 삭제: {}건", deleted);
           return null;  // 한번만 실행

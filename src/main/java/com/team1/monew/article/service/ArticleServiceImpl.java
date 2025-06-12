@@ -59,8 +59,6 @@ public class ArticleServiceImpl implements ArticleService {
 
   private final ApplicationEventPublisher eventPublisher;
 
-  private final ApplicationEventPublisher eventPublisher;
-
   @Transactional
   public void collectAndSaveNaverArticles(Interest interest, Keyword keyword) {
     log.info("📝 네이버 기사 수집 시작: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
