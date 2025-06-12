@@ -13,10 +13,17 @@ import com.team1.monew.user.dto.UserUpdateRequest;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.mapper.UserMapper;
 import com.team1.monew.user.repository.UserRepository;
+import com.team1.monew.useractivity.document.ArticleViewActivity;
+import com.team1.monew.useractivity.document.SubscriptionActivity;
+import com.team1.monew.useractivity.document.CommentActivity;
+import com.team1.monew.useractivity.document.CommentLikeActivity;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +38,7 @@ public class UserServiceImpl implements UserService {
   private final SubscriptionRepository subscriptionRepository;
   private final CommentLikeCountService commentLikeCountService;
   private final UserMapper userMapper;
+  private final MongoTemplate mongoTemplate;
 
   @Override
   public UserDto createUser(UserRegisterRequest userRegisterRequest) {
@@ -49,6 +57,41 @@ public class UserServiceImpl implements UserService {
     user = userRepository.save(user);
     log.info("사용자 생성 완료: id={}, email={}, nickname={}", user.getId(), user.getEmail(),
         user.getNickname());
+
+    // mongoDB
+    SubscriptionActivity subscriptionActivity = SubscriptionActivity.builder()
+        .userId(user.getId())
+        .subscriptions(new ArrayList<>())
+        .createdAt(LocalDateTime.now())
+        .updatedAt(LocalDateTime.now())
+        .build();
+
+    ArticleViewActivity articleViewActivity = ArticleViewActivity.builder()
+        .userId(user.getId())
+        .articleViews(new ArrayList<>())
+        .createdAt(LocalDateTime.now())
+        .updatedAt(LocalDateTime.now())
+        .build();
+
+    CommentActivity commentActivity = CommentActivity.builder()
+        .userId(user.getId())
+        .comments(new ArrayList<>())
+        .createdAt(LocalDateTime.now())
+        .updatedAt(LocalDateTime.now())
+        .build();
+
+    CommentLikeActivity commentLikeActivity = CommentLikeActivity.builder()
+        .userId(user.getId())
+        .commentLikes(new ArrayList<>())
+        .createdAt(LocalDateTime.now())
+        .updatedAt(LocalDateTime.now())
+        .build();
+
+    mongoTemplate.insert(subscriptionActivity);
+    mongoTemplate.insert(articleViewActivity);
+    mongoTemplate.insert(commentActivity);
+    mongoTemplate.insert(commentLikeActivity);
+
     return userMapper.toDto(user);
   }
 
