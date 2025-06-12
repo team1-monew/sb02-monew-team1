@@ -19,4 +19,14 @@ public interface ArticleViewRepository extends JpaRepository<ArticleView, Long> 
       + "WHERE av.viewedBy.id = :userId "
       + "ORDER BY av.createdAt DESC")
   List<ArticleView> findTop10ArticleViewByUserId(Long userId, Pageable pageable);
+
+  // todo: isDeleted, createdAt 관련 인덱스 필요 - 추후 생성 후 성능 측정
+  // articleView 테이블 - viewedBy + createdAt DESC 인덱스
+  // article 테이블 - isDeleted 인덱스
+  @Query("SELECT av FROM ArticleView av "
+      + "LEFT JOIN FETCH av.article a "
+      + "WHERE av.viewedBy.id = :userId "
+      + "AND a.isDeleted = false "
+      + "ORDER BY av.createdAt DESC")
+  List<ArticleView> findValidArticleViewsByUserIdOrderByCreatedAt(Long userId);
 }

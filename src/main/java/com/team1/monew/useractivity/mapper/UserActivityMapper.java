@@ -18,10 +18,11 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class UserActivityMapper {
-
   private final CommentMapper commentMapper;
   private final CommentLikeMapper commentLikeMapper;
   private final SubscriptionMapper subscriptionMapper;
+
+
 
   public UserActivityDto toDto(UserActivityParam userActivityParam) {
 

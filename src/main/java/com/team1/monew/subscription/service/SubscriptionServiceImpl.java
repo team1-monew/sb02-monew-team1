@@ -6,6 +6,8 @@ import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.interest.repository.InterestRepository;
 import com.team1.monew.subscription.dto.SubscriptionDto;
 import com.team1.monew.subscription.entity.Subscription;
+import com.team1.monew.subscription.event.SubscriptionCreateEvent;
+import com.team1.monew.subscription.event.SubscriptionDeleteEvent;
 import com.team1.monew.subscription.mapper.SubscriptionMapper;
 import com.team1.monew.subscription.repository.SubscriptionRepository;
 import com.team1.monew.user.entity.User;
@@ -13,6 +15,7 @@ import com.team1.monew.user.repository.UserRepository;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   private final InterestRepository interestRepository;
   private final UserRepository userRepository;
   private final SubscriptionMapper subscriptionMapper;
+
+  private final ApplicationEventPublisher eventPublisher;
 
   @Override
   @Transactional
@@ -46,9 +51,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     subscriptionRepository.save(subscription);
 
     interestRepository.incrementSubscriberCount(interestId);
+
+    SubscriptionDto subscriptionDto = subscriptionMapper.toDto(subscription);
+
+    eventPublisher.publishEvent(SubscriptionCreateEvent.builder()
+        .subscriptionDto(subscriptionDto)
+        .userId(userId)
+        .build());
+
     log.info("관심사 구독 완료 - interestId: {}, userId: {}", interestId, userId);
 
-    return subscriptionMapper.toDto(subscription);
+    return subscriptionDto;
   }
 
   @Override
@@ -63,10 +76,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
               Map.of("interestId", interestId, "userId", userId, "detail",
                   "subscription not found"));
         });
-    subscriptionRepository.deleteById(subscription.getId());
+    Long subscriptionId = subscription.getId();
+    subscriptionRepository.deleteById(subscriptionId);
 
     interestRepository.decrementSubscriberCount(interestId);
-    
+
+    eventPublisher.publishEvent(SubscriptionDeleteEvent.builder()
+        .subscriptionId(subscriptionId)
+        .userId(userId)
+        .build());
+
     log.info("관심사 구독 취소 완료 - interestId: {}, userId: {}", interestId, userId);
   }
 
