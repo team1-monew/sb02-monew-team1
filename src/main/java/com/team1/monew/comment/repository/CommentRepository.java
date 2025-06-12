@@ -1,6 +1,7 @@
 package com.team1.monew.comment.repository;
 
 import com.team1.monew.comment.entity.Comment;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -24,5 +25,15 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, Comment
           AND c.isDeleted = false
         ORDER BY c.createdAt DESC
     """)
-    List<Comment> findTop10ByUser_IdAndIsDeletedFalseOrderByCreatedAtDesc(Long userId);
+    List<Comment> findTop10ByUser_IdAndIsDeletedFalseOrderByCreatedAtDesc(Long userId, Pageable pageable);
+
+    @Query("""
+        SELECT c
+        FROM Comment c
+        JOIN FETCH c.article
+        WHERE c.user.id = :userId
+          AND c.isDeleted = false
+        ORDER BY c.createdAt DESC
+    """)
+    List<Comment> findByUser_IdAndIsDeletedFalseOrderByCreatedAtDesc(Long userId);
 }
