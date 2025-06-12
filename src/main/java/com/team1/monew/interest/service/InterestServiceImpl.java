@@ -1,5 +1,7 @@
 package com.team1.monew.interest.service;
 
+import com.team1.monew.interest.event.KeywordAddedEvent;
+import com.team1.monew.interest.event.KeywordRemovedEvent;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
 import com.team1.monew.interest.dto.InterestDto;
@@ -17,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +32,7 @@ public class InterestServiceImpl implements InterestService {
   private final InterestRepository interestRepository;
   private final SubscriptionRepository subscriptionRepository;
   private final InterestMapper interestMapper;
+  private final ApplicationEventPublisher eventPublisher;
 
   @Override
   @Transactional
@@ -41,6 +45,9 @@ public class InterestServiceImpl implements InterestService {
     });
     interestRepository.save(interest);
     log.info("관심사 생성 완료 - interestId: {}, interestName: {}", interest.getId(), interest.getName());
+
+    KeywordAddedEvents(interest, interestRegisterRequest.keywords());
+
     return interestMapper.toDto(interest, false);
   }
 
@@ -50,17 +57,26 @@ public class InterestServiceImpl implements InterestService {
     Interest interest = interestRepository.findById(id).orElseThrow(() -> {
       log.warn("관심사 수정 실패 - 해당 관심사가 존재하지 않음, id: {}", id);
       return new RestException(ErrorCode.NOT_FOUND,
-          Map.of("id", id, "detail", "interest not found"));
+              Map.of("id", id, "detail", "interest not found"));
     });
-    List<Keyword> keywords = interestUpdateRequest.keywords().stream().map(Keyword::new).toList();
 
-    interest.updateKeywords(keywords);
+    KeywordUpdateResult changeResult = detectKeywordChangesAndUpdateInterest(interest, interestUpdateRequest.keywords());
 
     interestRepository.save(interest);
     log.info("관심사 수정 완료 - interestId: {}", interest.getId());
+
+    if (!changeResult.added().isEmpty()) {
+      KeywordAddedEvents(interest, changeResult.added());
+    }
+
+    if (!changeResult.removed().isEmpty()) {
+      KeywordRemovedEvents(interest, changeResult.removed());
+    }
+
     return interestMapper.toDto(interest,
-        subscriptionRepository.existsByInterest_IdAndUser_Id(id, userId));
+            subscriptionRepository.existsByInterest_IdAndUser_Id(id, userId));
   }
+
 
   @Override
   @Transactional
@@ -135,4 +151,39 @@ public class InterestServiceImpl implements InterestService {
     }
     return count;
   }
+
+  private void KeywordAddedEvents(Interest interest, Iterable<String> keywords) {
+    keywords.forEach(keywordStr -> {
+      log.info("키워드 추가 이벤트 발행 - keyword: {}", keywordStr);
+      eventPublisher.publishEvent(new KeywordAddedEvent(interest, keywordStr));
+    });
+  }
+
+  private void KeywordRemovedEvents(Interest interest, Iterable<String> keywords) {
+    keywords.forEach(keywordStr -> {
+      log.info("키워드 제거 이벤트 발행 - keyword: {}", keywordStr);
+      eventPublisher.publishEvent(new KeywordRemovedEvent(interest, keywordStr));
+    });
+  }
+
+  private KeywordUpdateResult detectKeywordChangesAndUpdateInterest(Interest interest, List<String> newKeywordStrs) {
+    List<String> oldKeywordStrs = interest.getKeywords().stream()
+            .map(Keyword::getKeyword)
+            .toList();
+
+    Set<String> addedStrs = new HashSet<>(newKeywordStrs);
+    oldKeywordStrs.forEach(addedStrs::remove);
+
+    Set<String> removedStrs = new HashSet<>(oldKeywordStrs);
+    newKeywordStrs.forEach(removedStrs::remove);
+
+    List<Keyword> newKeywords = newKeywordStrs.stream()
+            .map(Keyword::new)
+            .toList();
+    interest.updateKeywords(newKeywords);
+
+    return new KeywordUpdateResult(addedStrs, removedStrs);
+  }
+
+  private static record KeywordUpdateResult(Set<String> added, Set<String> removed) {}
 }
