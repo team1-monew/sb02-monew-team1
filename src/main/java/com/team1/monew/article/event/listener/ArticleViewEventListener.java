@@ -19,7 +19,6 @@ public class ArticleViewEventListener {
 
   private final MongoTemplate mongoTemplate;
 
-  //todo: 동시성 문제 해결 - 낙관적 락
   @EventListener
   @Async
   public void handleArticleViewCreateEvent(ArticleViewCreateEvent articleViewCreateEvent) {
