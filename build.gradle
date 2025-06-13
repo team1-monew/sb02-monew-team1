@@ -46,6 +46,8 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'com.h2database:h2'
 	testImplementation 'org.awaitility:awaitility:4.2.0'
+	testImplementation 'org.testcontainers:mongodb'
+	testImplementation 'org.testcontainers:postgresql'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	implementation 'software.amazon.awssdk:s3:2.20.56'
