@@ -71,7 +71,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     log.info("📝 네이버 기사 저장 완료: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
 
-    eventPublisher.publishEvent(new NewArticlesCollectedEvent(interest, collectedArticles));
+    if (!collectedArticles.isEmpty()) {
+      eventPublisher.publishEvent(new NewArticlesCollectedEvent(interest, collectedArticles));
+    }
   }
 
   @Transactional
@@ -93,7 +95,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     log.info("📝 조선일보 기사 저장 완료: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
 
-    eventPublisher.publishEvent(new NewArticlesCollectedEvent(interest, collectedArticles));
+    if (!filtered.isEmpty()) {
+      eventPublisher.publishEvent(new NewArticlesCollectedEvent(interest, filtered));
+    }
   }
 
   private void saveArticles(List<CollectedArticleDto> collectedArticles, Interest interest) {

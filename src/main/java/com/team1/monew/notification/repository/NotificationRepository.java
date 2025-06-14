@@ -31,4 +31,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
   @Query("DELETE FROM Notification n " +
       " WHERE n.confirmed = true AND n.updatedAt < :cutoffDate")
   int deleteConfirmedBefore(LocalDateTime cutoffDate);
+
+  long countByUserIdAndConfirmedFalse(Long userId);
 }
