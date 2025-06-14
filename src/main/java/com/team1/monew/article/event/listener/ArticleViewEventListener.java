@@ -19,22 +19,25 @@ public class ArticleViewEventListener {
 
   private final MongoTemplate mongoTemplate;
 
-  //todo: 동시성 문제 해결 - 낙관적 락
   @EventListener
   @Async
   public void handleArticleViewCreateEvent(ArticleViewCreateEvent articleViewCreateEvent) {
-    Document push = new Document()
-        .append("$each", List.of(articleViewCreateEvent.articleViewDto()))
-        .append("$position", 0); // 배열 맨 앞에 추가
+    try {
+      Document push = new Document()
+          .append("$each", List.of(articleViewCreateEvent.articleViewDto()))
+          .append("$position", 0); // 배열 맨 앞에 추가
 
-    Document update = new Document("$push", new Document("articleViews", push))
-        .append("$set", new Document("updatedAt", LocalDateTime.now()));
+      Document update = new Document("$push", new Document("articleViews", push))
+          .append("$set", new Document("updatedAt", LocalDateTime.now()));
 
-    mongoTemplate.getDb()
-        .getCollection("article_view_activities")
-        .updateOne(
-            Filters.eq("_id", articleViewCreateEvent.userId()),
-            update
-        );
+      mongoTemplate.getDb()
+          .getCollection("article_view_activities")
+          .updateOne(
+              Filters.eq("_id", articleViewCreateEvent.userId()),
+              update
+          );
+    } catch (Exception e) {
+      log.error("ArticleView 이벤트 처리 실패 - ArticleViewActivity 저장 중 예외 발생: userId={}, err={}", articleViewCreateEvent.userId(), e.getMessage(), e);
+    }
   }
 }

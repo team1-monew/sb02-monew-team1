@@ -34,7 +34,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   @Override
   @Transactional
   public SubscriptionDto create(Long interestId, Long userId) {
-    Interest interest = interestRepository.findById(interestId)
+    interestRepository.findById(interestId)
         .orElseThrow(() -> {
           log.warn("관심사 구독 실패 - 해당 관심사가 존재하지 않음, interestId: {}", interestId);
           return new RestException(ErrorCode.NOT_FOUND,
@@ -47,10 +47,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
               Map.of("userId", userId, "detail", "user not found"));
         });
     checkDuplicateSubscription(interestId, userId);
-    Subscription subscription = new Subscription(user, interest);
-    subscriptionRepository.save(subscription);
 
     interestRepository.incrementSubscriberCount(interestId);
+    Interest updatedInterest = interestRepository.findById(interestId).orElseThrow();
+
+    Subscription subscription = new Subscription(user, updatedInterest);
+    subscriptionRepository.save(subscription);
 
     SubscriptionDto subscriptionDto = subscriptionMapper.toDto(subscription);
 
