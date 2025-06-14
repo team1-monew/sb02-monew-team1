@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -64,6 +65,9 @@ class ArticleServiceImplTest {
 
     @Mock
     private S3Util s3Util;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     private ObjectMapper objectMapper;
 
