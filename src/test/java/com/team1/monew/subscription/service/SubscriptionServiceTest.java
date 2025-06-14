@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.*;
@@ -33,6 +34,9 @@ public class SubscriptionServiceTest {
 
   @Mock
   UserRepository userRepository;
+
+  @Mock
+  ApplicationEventPublisher eventPublisher;
 
   @Spy
   SubscriptionMapper subscriptionMapper;

@@ -12,11 +12,11 @@ public interface InterestRepository extends JpaRepository<Interest, Long>, Inter
   @Query("SELECT i FROM Interest i LEFT JOIN FETCH i.keywords")
   List<Interest> findAllWithKeywords();
 
-  @Modifying(flushAutomatically = true) //update 전에 flush를 실행하여, 최신 DB 상태를 기준으로 실행
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
   @Query("UPDATE Interest i SET i.subscriberCount = i.subscriberCount + 1 WHERE i.id = :id")
   void incrementSubscriberCount(@Param("id") Long id);
 
-  @Modifying(flushAutomatically = true)
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
   @Query("UPDATE Interest i SET i.subscriberCount = i.subscriberCount - 1 WHERE i.id = :id")
   void decrementSubscriberCount(@Param("id") Long id);
 }
