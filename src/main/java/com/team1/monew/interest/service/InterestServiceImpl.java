@@ -46,7 +46,7 @@ public class InterestServiceImpl implements InterestService {
     interestRepository.save(interest);
     log.info("관심사 생성 완료 - interestId: {}, interestName: {}", interest.getId(), interest.getName());
 
-    KeywordAddedEvents(interest, interestRegisterRequest.keywords());
+    keywordAddedEvents(interest, interestRegisterRequest.keywords());
 
     return interestMapper.toDto(interest, false);
   }
@@ -66,11 +66,11 @@ public class InterestServiceImpl implements InterestService {
     log.info("관심사 수정 완료 - interestId: {}", interest.getId());
 
     if (!changeResult.added().isEmpty()) {
-      KeywordAddedEvents(interest, changeResult.added());
+      keywordAddedEvents(interest, changeResult.added());
     }
 
     if (!changeResult.removed().isEmpty()) {
-      KeywordRemovedEvents(interest, changeResult.removed());
+      keywordRemovedEvents(interest, changeResult.removed());
     }
 
     return interestMapper.toDto(interest,
@@ -152,14 +152,14 @@ public class InterestServiceImpl implements InterestService {
     return count;
   }
 
-  private void KeywordAddedEvents(Interest interest, Iterable<String> keywords) {
+  private void keywordAddedEvents(Interest interest, Iterable<String> keywords) {
     keywords.forEach(keywordStr -> {
       log.info("키워드 추가 이벤트 발행 - keyword: {}", keywordStr);
       eventPublisher.publishEvent(new KeywordAddedEvent(interest, keywordStr));
     });
   }
 
-  private void KeywordRemovedEvents(Interest interest, Iterable<String> keywords) {
+  private void keywordRemovedEvents(Interest interest, Iterable<String> keywords) {
     keywords.forEach(keywordStr -> {
       log.info("키워드 제거 이벤트 발행 - keyword: {}", keywordStr);
       eventPublisher.publishEvent(new KeywordRemovedEvent(interest, keywordStr));
