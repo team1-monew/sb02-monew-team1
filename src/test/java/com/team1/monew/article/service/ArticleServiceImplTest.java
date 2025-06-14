@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.team1.monew.article.collector.ChosunNewsCollector;
-import com.team1.monew.article.collector.NewsCollector;
+import com.team1.monew.article.collector.NaverNewsCollector;
 import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.article.dto.ArticleViewDto;
 import com.team1.monew.article.dto.CollectedArticleDto;
@@ -58,7 +58,7 @@ class ArticleServiceImplTest {
     private CommentRepository commentRepository;
 
     @Mock
-    private NewsCollector naverNewsCollector;
+    private NaverNewsCollector naverNewsCollector;
 
     @Mock
     private ChosunNewsCollector chosunNewsCollector;

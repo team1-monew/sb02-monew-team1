@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ChosunNewsCollector implements NewsCollector {
+public class ChosunNewsCollector{
 
   @Value("${rss.chosun-url}")
   private String rssUrl;
@@ -37,7 +37,6 @@ public class ChosunNewsCollector implements NewsCollector {
   @Value("${rss.chosun-source-name}")
   private String sourceName;
 
-  @Override
   public List<CollectedArticleDto> collect(Interest interest, Keyword keyword) {
     try {
       if (rssUrl == null || rssUrl.isBlank()) {
