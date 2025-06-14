@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -35,6 +36,9 @@ public class InterestServiceTest {
 
   @Mock
   SubscriptionRepository subscriptionRepository;
+
+  @Mock
+  ApplicationEventPublisher eventPublisher;
 
   // 공유 의존성이 아니므로 Mocking 하지 않고 실제 객체 사용
   @Spy

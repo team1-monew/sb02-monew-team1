@@ -14,7 +14,6 @@ import com.team1.monew.comment.entity.QComment;
 import com.team1.monew.common.dto.CursorPageResponse;
 import com.team1.monew.exception.ErrorCode;
 import com.team1.monew.exception.RestException;
-import com.team1.monew.interest.repository.InterestRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;

@@ -32,7 +32,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class NaverNewsCollector implements NewsCollector {
+public class NaverNewsCollector{
 
   @Value("${naver.client-id}")
   private String clientId;
@@ -46,7 +46,6 @@ public class NaverNewsCollector implements NewsCollector {
   @Value("${naver.source-name}")
   private String sourceName;
 
-  @Override
   public List<CollectedArticleDto> collect(Interest interest, Keyword keyword) {
     try {
       String query = URLEncoder.encode(keyword.getKeyword(), StandardCharsets.UTF_8);

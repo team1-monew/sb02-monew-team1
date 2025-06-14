@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -93,8 +94,13 @@ public class CommentRepositoryImplTest {
     void likeCount_기준_asc_정렬_created_desc_정렬() {
         // given
         Comment c1 = new Comment(article, user, "like 5 - old");
+        ReflectionTestUtils.setField(c1, "createdAt", LocalDateTime.of(2024, 1, 1, 0, 0));
+
         Comment c2 = new Comment(article, user, "like 5 - new");
+        ReflectionTestUtils.setField(c2, "createdAt", LocalDateTime.of(2025, 1, 1, 0, 0));
+
         Comment c3 = new Comment(article, user, "like 10");
+        ReflectionTestUtils.setField(c3, "createdAt", LocalDateTime.of(2023, 1, 1, 0, 0));
         em.persist(c1);
         em.persist(c2);
         em.persist(c3);

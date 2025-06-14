@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
                        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                        email VARCHAR(255) NOT NULL UNIQUE,
                        nickname VARCHAR(20) NOT NULL,
@@ -7,21 +7,21 @@ CREATE TABLE users (
                        is_deleted BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE interests (
+CREATE TABLE IF NOT EXISTS interests (
                            id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                            name VARCHAR(50) NOT NULL UNIQUE,
                            subscriber_count BIGINT DEFAULT 0,
                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE keywords (
+CREATE TABLE IF NOT EXISTS keywords (
                           id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                           interest_id BIGINT NOT NULL,
                           keyword VARCHAR(50) NOT NULL,
                           FOREIGN KEY (interest_id) REFERENCES interests(id) ON DELETE CASCADE
 );
 
-CREATE TABLE subscriptions (
+CREATE TABLE IF NOT EXISTS subscriptions (
                                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                                user_id BIGINT NOT NULL,
                                interest_id BIGINT NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE subscriptions (
                                FOREIGN KEY (interest_id) REFERENCES interests(id) ON DELETE CASCADE
 );
 
-CREATE TABLE articles (
+CREATE TABLE IF NOT EXISTS articles (
                           id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                           source VARCHAR(255) NOT NULL,
                           source_url TEXT,
@@ -42,7 +42,7 @@ CREATE TABLE articles (
                           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE article_interests (
+CREATE TABLE IF NOT EXISTS article_interests (
                                    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                                    interest_id BIGINT,
                                    article_id BIGINT,
@@ -50,7 +50,7 @@ CREATE TABLE article_interests (
                                    FOREIGN KEY (article_id) REFERENCES articles(id)
 );
 
-CREATE TABLE article_views (
+CREATE TABLE IF NOT EXISTS article_views (
                                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                                article_id BIGINT NOT NULL,
                                viewed_by BIGINT NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE article_views (
                                FOREIGN KEY (viewed_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
-CREATE TABLE comments (
+CREATE TABLE IF NOT EXISTS comments (
                           id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                           article_id BIGINT NOT NULL,
                           user_id BIGINT NOT NULL,
@@ -72,7 +72,7 @@ CREATE TABLE comments (
                           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
-CREATE TABLE comment_likes (
+CREATE TABLE IF NOT EXISTS comment_likes (
                                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                                comment_id BIGINT NOT NULL,
                                liked_by BIGINT NOT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE comment_likes (
                                FOREIGN KEY (liked_by) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE user_activities (
+CREATE TABLE IF NOT EXISTS user_activities (
                                  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                                  user_id BIGINT NOT NULL,
                                  action_type VARCHAR(50),
@@ -90,7 +90,7 @@ CREATE TABLE user_activities (
                                  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
                                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                                user_id BIGINT NOT NULL,
                                content TEXT NOT NULL,
@@ -102,7 +102,7 @@ CREATE TABLE notifications (
                                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE shedlock (
+CREATE TABLE IF NOT EXISTS shedlock (
                           name VARCHAR(64) PRIMARY KEY,
                           lock_until TIMESTAMP(3) NULL,
                           locked_at TIMESTAMP(3) NULL,

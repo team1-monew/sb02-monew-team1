@@ -14,6 +14,8 @@ import com.team1.monew.user.dto.UserRegisterRequest;
 import com.team1.monew.user.service.UserService;
 import java.util.List;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -40,10 +44,13 @@ import static org.mockito.BDDMockito.*;
 @ActiveProfiles("postgres-test")
 @Testcontainers
 @Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class InterestApiIntegrationTest extends IntegrationTestSupport {
 
   @Container
   static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0");
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
 
   @DynamicPropertySource
   static void setMongoUri(DynamicPropertyRegistry registry) {

@@ -3,7 +3,7 @@ package com.team1.monew.article.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team1.monew.article.dto.CollectedArticleDto;
-import com.team1.monew.article.collector.NewsCollector;
+import com.team1.monew.article.collector.NaverNewsCollector;
 import com.team1.monew.article.collector.ChosunNewsCollector;
 import com.team1.monew.article.dto.ArticleDto;
 import com.team1.monew.article.dto.ArticleViewDto;
@@ -52,7 +52,7 @@ public class ArticleServiceImpl implements ArticleService {
   private final InterestRepository interestRepository;
   private final UserRepository userRepository;
   private final CommentRepository commentRepository;
-  private final NewsCollector naverNewsCollector;
+  private final NaverNewsCollector naverNewsCollector;
   private final ChosunNewsCollector chosunNewsCollector;
   private final S3Util s3Util;
   private final ObjectMapper objectMapper;
