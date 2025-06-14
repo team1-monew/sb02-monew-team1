@@ -1,5 +1,7 @@
 package com.team1.monew.article.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.team1.monew.article.entity.Article;
 import com.team1.monew.article.entity.ArticleView;
 import com.team1.monew.config.QueryDslConfig;
@@ -15,8 +17,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-
-import static org.assertj.core.api.Assertions.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -62,6 +63,10 @@ public class ArticleViewRepositoryTest {
     ArticleView view1 = new ArticleView(article1, user);
     ArticleView view2 = new ArticleView(article2, user); // 삭제된 기사
     ArticleView view3 = new ArticleView(article3, user);;
+
+    ReflectionTestUtils.setField(view1, "createdAt", LocalDateTime.of(2025, 6, 11, 17, 30));
+    ReflectionTestUtils.setField(view2, "createdAt", LocalDateTime.of(2025, 6, 11, 15, 30));
+    ReflectionTestUtils.setField(view3, "createdAt", LocalDateTime.of(2025, 6, 11, 13, 30));
 
     entityManager.persist(view1);
     entityManager.persist(view2);

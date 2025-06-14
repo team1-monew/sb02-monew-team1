@@ -12,7 +12,7 @@ public interface ArticleInterestRepository extends CrudRepository<ArticleInteres
 
   void deleteByArticleId(Long articleId);
 
-    boolean existsByArticleIdAndInterestId(Long articleId, Long interestId);
+  boolean existsByArticleIdAndInterestId(Long articleId, Long interestId);
 
   @Modifying
   @Query("DELETE FROM ArticleInterest ai WHERE ai.article.id = :articleId AND ai.interest.id = :interestId")
