@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -113,12 +114,15 @@ class NotificationServiceImplTest {
 
     Slice<NotificationDto> slice = new SliceImpl<>(dtoList, PageRequest.of(0, request.limit()), false);
 
+    long totalElements = 1L;
+
     CursorPageResponse<NotificationDto> expectedResponse =
-        new CursorPageResponse<>(dtoList, null, null, 1L, null, false);
+        new CursorPageResponse<>(dtoList, null, null, 1L, totalElements, false);
 
     // stub
     given(notificationRepository.getAllByCursorRequest(any())).willReturn(slice);
-    given(notificationPageResponseMapper.toPageResponse(anyList(), any(), anyBoolean()))
+    given(notificationRepository.countByUserIdAndConfirmedFalse(any())).willReturn(totalElements);
+    given(notificationPageResponseMapper.toPageResponse(anyList(), any(), anyLong(), anyBoolean()))
         .willReturn(expectedResponse);
 
     // when
@@ -128,7 +132,7 @@ class NotificationServiceImplTest {
     assertThat(result).isEqualTo(expectedResponse);
     verify(notificationRepository).getAllByCursorRequest(request);
     verify(notificationPageResponseMapper)
-        .toPageResponse(dtoList, request, false);
+        .toPageResponse(dtoList, request, totalElements, false);
   }
 
   @Test

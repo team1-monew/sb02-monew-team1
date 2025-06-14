@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles("test")
 @DataJpaTest
 @Import(QueryDslConfig.class) // 필요 시 QueryDSL 설정 포함
 class NotificationRepositoryTest {
@@ -159,4 +161,56 @@ class NotificationRepositoryTest {
     List<Notification> remaining = notificationRepository.findAll();
     assertThat(remaining.size()).isEqualTo(2);
   }
+
+  @Test
+  @DisplayName("countByUserIdAndConfirmedFalse()는 confirmed=false인 알림만 정확히 센다")
+  void countByUserIdAndConfirmedFalse_shouldCountOnlyUnconfirmed() {
+    // given
+    User user = User.builder()
+        .email("test@example.com")
+        .nickname("testuser")
+        .password("testpassword")
+        .build();
+    entityManager.persist(user);
+
+    // confirmed = false (기본값)
+    Notification unconfirmed1 = Notification.builder()
+        .user(user)
+        .content("unconfirmed 1")
+        .resourceType(ResourceType.COMMENT.getName())
+        .resourceId(1L)
+        .build();
+    entityManager.persist(unconfirmed1);
+
+    Notification unconfirmed2 = Notification.builder()
+        .user(user)
+        .content("unconfirmed 2")
+        .resourceType(ResourceType.INTEREST.getName())
+        .resourceId(2L)
+        .build();
+    entityManager.persist(unconfirmed2);
+
+    // confirmed = true
+    Notification confirmed = Notification.builder()
+        .user(user)
+        .content("confirmed")
+        .resourceType(ResourceType.INTEREST.getName())
+        .resourceId(3L)
+        .build();
+    entityManager.persist(confirmed);
+
+    entityManager.flush();
+    entityManager.clear();
+
+    notificationRepository.markAsConfirmedByNotificationId(confirmed.getId());
+    entityManager.flush();
+    entityManager.clear();
+
+    // when
+    long count = notificationRepository.countByUserIdAndConfirmedFalse(user.getId());
+
+    // then
+    assertThat(count).isEqualTo(2);
+  }
+
 }
