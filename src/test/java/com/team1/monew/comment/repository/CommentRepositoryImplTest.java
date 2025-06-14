@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -189,4 +190,54 @@ public class CommentRepositoryImplTest {
         assertEquals("살아있음", result.getContent().get(0).getContent());
     }
 
+    @Test
+    void findTop10ByUserIdAndIsDeletedFalseOrderByCreatedAtDesc_정상조회() {
+        // given
+        for (int i = 0; i < 15; i++) {
+            Comment comment = new Comment(article, user, "댓글 " + i);
+            em.persist(comment);
+        }
+        em.flush();
+        em.clear();
+
+        // when
+        List<Comment> result = commentRepository.findTop10ByUser_IdAndIsDeletedFalseOrderByCreatedAtDesc(
+            user.getId(),
+            Pageable.ofSize(10)
+        );
+
+        // then
+        assertEquals(10, result.size());
+        for (int i = 0; i < result.size() - 1; i++) {
+            assertTrue(result.get(i).getCreatedAt().isAfter(result.get(i + 1).getCreatedAt()) ||
+                result.get(i).getCreatedAt().isEqual(result.get(i + 1).getCreatedAt()));
+        }
+    }
+
+    @Test
+    void findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc_삭제댓글제외후_모두조회() {
+        // given
+        for (int i = 0; i < 5; i++) {
+            Comment comment = new Comment(article, user, "살아있는 댓글 " + i);
+            em.persist(comment);
+        }
+        Comment deleted = new Comment(article, user, "삭제된 댓글");
+        em.persist(deleted);
+        em.flush();
+
+        jdbcTemplate.update("UPDATE comments SET is_deleted = true WHERE id = ?", deleted.getId());
+
+        em.clear();
+
+        // when
+        List<Comment> result = commentRepository.findByUser_IdAndIsDeletedFalseOrderByCreatedAtDesc(user.getId());
+
+        // then
+        assertEquals(5, result.size());
+        assertTrue(result.stream().noneMatch(c -> c.getContent().contains("삭제된")));
+        for (int i = 0; i < result.size() - 1; i++) {
+            assertTrue(result.get(i).getCreatedAt().isAfter(result.get(i + 1).getCreatedAt()) ||
+                result.get(i).getCreatedAt().isEqual(result.get(i + 1).getCreatedAt()));
+        }
+    }
 }
