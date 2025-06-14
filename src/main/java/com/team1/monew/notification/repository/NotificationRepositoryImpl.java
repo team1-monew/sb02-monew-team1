@@ -32,14 +32,12 @@ public class NotificationRepositoryImpl implements NotificationRepositoryCustom 
     // cursor 처리
     if (request.cursor() != null) {
       LocalDateTime cursorDateTime = LocalDateTime.parse(request.cursor());
-      where.and(request.direction().isAscending() ?
-          qNotification.createdAt.gt(cursorDateTime) : qNotification.createdAt.lt(cursorDateTime));
+      where.and(qNotification.createdAt.gt(cursorDateTime));
     }
 
     // after 처리
     if (request.after() != null) {
-      where.and(request.direction().isAscending() ?
-          qNotification.createdAt.gt(request.after()) : qNotification.createdAt.lt(request.after()));
+      where.and(qNotification.createdAt.gt(request.after()));
     }
 
     // direction 처리 - 정렬 조건
