@@ -12,6 +12,7 @@ public class NotificationPageResponseMapper {
   public CursorPageResponse<NotificationDto> toPageResponse(
       List<NotificationDto> content,
       NotificationCursorRequest request,
+      long totalElements,
       boolean hasNext
   ) {
     if (content == null || content.isEmpty()) {
@@ -20,7 +21,7 @@ public class NotificationPageResponseMapper {
           null,
           null,
           (long) request.limit(),
-          null,
+          totalElements,
           hasNext
       );
     }
@@ -36,7 +37,7 @@ public class NotificationPageResponseMapper {
         nextCursor,
         nextAfter,
         (long) request.limit(),
-        (long) content.size(),
+        totalElements,
         hasNext
     );
   }

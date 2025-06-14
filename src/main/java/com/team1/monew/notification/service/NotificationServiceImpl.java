@@ -72,7 +72,9 @@ public class NotificationServiceImpl implements NotificationService {
         result.hasNext()
     );
 
-    return notificationPageResponseMapper.toPageResponse(result.getContent(), request, result.hasNext());
+    long totalElements = notificationRepository.countByUserIdAndConfirmedFalse(request.userId());
+
+    return notificationPageResponseMapper.toPageResponse(result.getContent(), request, totalElements, result.hasNext());
   }
 
   @Override
