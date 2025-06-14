@@ -50,8 +50,6 @@ dependencies {
 	testImplementation 'org.testcontainers:mongodb'
 	testImplementation 'org.testcontainers:postgresql'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	testImplementation 'org.testcontainers:junit-jupiter'
-	testImplementation 'org.testcontainers:mongodb'
 
 	implementation 'software.amazon.awssdk:s3:2.20.56'
 
