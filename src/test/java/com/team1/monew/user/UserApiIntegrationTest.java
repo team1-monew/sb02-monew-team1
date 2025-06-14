@@ -12,11 +12,13 @@ import com.team1.monew.user.dto.UserLoginRequest;
 import com.team1.monew.user.dto.UserRegisterRequest;
 import com.team1.monew.user.dto.UserUpdateRequest;
 import com.team1.monew.user.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,6 +38,14 @@ class UserApiIntegrationTest {
   @Autowired
   private UserService userService;
 
+  @Autowired
+  private MongoTemplate mongoTemplate;
+
+  @BeforeEach
+  void cleanUp() {
+    mongoTemplate.getDb().drop();
+  }
+
   @Test
   @DisplayName("회원 가입 API 통합테스트")
   void create_success() throws Exception {
@@ -43,7 +53,7 @@ class UserApiIntegrationTest {
     UserRegisterRequest userRegisterRequest = UserRegisterRequest.builder()
         .email("register_success@email.com")
         .nickname("nickname")
-        .password("password")
+        .password("password123@@@")
         .build();
 
     // when & then
@@ -86,7 +96,7 @@ class UserApiIntegrationTest {
     UserRegisterRequest userRegisterRequest1 = new UserRegisterRequest(
         "register_duplicate_email@example.com",
         "nickname",
-        "password"
+        "password123@@@"
     );
     mockMvc.perform(post("/api/users")
             .contentType(MediaType.APPLICATION_JSON)
@@ -97,7 +107,7 @@ class UserApiIntegrationTest {
     UserRegisterRequest userRegisterRequest2 = new UserRegisterRequest(
         "register_duplicate_email@example.com",
         "nickname",
-        "password"
+        "password123@@@"
     );
 
     // then: 409 CONFLICT 기대
@@ -117,7 +127,7 @@ class UserApiIntegrationTest {
     UserRegisterRequest userRegisterRequest = UserRegisterRequest.builder()
         .email("login_success@email.com")
         .nickname("nickname")
-        .password("password")
+        .password("password123@@@")
         .build();
 
     userService.createUser(userRegisterRequest);
@@ -125,7 +135,7 @@ class UserApiIntegrationTest {
     // 로그인 요청
     UserLoginRequest userLoginRequest = UserLoginRequest.builder()
         .email("login_success@email.com")
-        .password("password")
+        .password("password123@@@")
         .build();
 
     // when & then
@@ -147,7 +157,7 @@ class UserApiIntegrationTest {
     UserRegisterRequest userRegisterRequest = UserRegisterRequest.builder()
         .email("login_email_not_found1@email.com")
         .nickname("nickname")
-        .password("password")
+        .password("password123@@@")
         .build();
 
     userService.createUser(userRegisterRequest);
@@ -155,7 +165,7 @@ class UserApiIntegrationTest {
     // 존재하지 않는 이메일로 로그인 요청
     UserLoginRequest userLoginRequest = UserLoginRequest.builder()
         .email("doesnt_exist_email@email.com")
-        .password("password")
+        .password("password123@@@")
         .build();
 
     // when & then
@@ -176,7 +186,7 @@ class UserApiIntegrationTest {
     UserRegisterRequest userRegisterRequest = UserRegisterRequest.builder()
         .email("login_incorrect_password@email.com")
         .nickname("nickname")
-        .password("password")
+        .password("password123@@@")
         .build();
 
     userService.createUser(userRegisterRequest);
@@ -184,7 +194,7 @@ class UserApiIntegrationTest {
     // 잘못된 비밀번호로 로그인 요청
     UserLoginRequest userLoginRequest = UserLoginRequest.builder()
         .email("login_incorrect_password@email.com")
-        .password("password2")
+        .password("password2123@@@")
         .build();
 
     // when & then
@@ -205,7 +215,7 @@ class UserApiIntegrationTest {
     UserRegisterRequest userRegisterRequest = UserRegisterRequest.builder()
         .email("updateUser_success@email.com")
         .nickname("nickname")
-        .password("password")
+        .password("password123@@@")
         .build();
 
     UserDto createdUser = userService.createUser(userRegisterRequest);
@@ -214,8 +224,8 @@ class UserApiIntegrationTest {
 
     // 업데이트 Dto 생성
     UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder()
-            .nickname("newNickname")
-            .build();
+        .nickname("newNickname")
+        .build();
 
     // when & then
     mockMvc.perform(patch("/api/users/{userId}", userId)
@@ -224,7 +234,7 @@ class UserApiIntegrationTest {
             .content(objectMapper.writeValueAsString(userUpdateRequest)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").exists())
-        .andExpect(jsonPath("$.email").value("updateUser_success@email.com"))
+        .andExpect(jsonPath("$.email").value("updateuser_success@email.com"))
         .andExpect(jsonPath("$.nickname").value("newNickname"))
         .andExpect(jsonPath("$.createdAt").exists());
   }
@@ -237,7 +247,7 @@ class UserApiIntegrationTest {
     UserRegisterRequest userRegisterRequest = UserRegisterRequest.builder()
         .email("deleteUser_success@email.com")
         .nickname("nickname")
-        .password("password")
+        .password("password123@@@")
         .build();
 
     UserDto createdUser = userService.createUser(userRegisterRequest);
@@ -257,7 +267,7 @@ class UserApiIntegrationTest {
     UserRegisterRequest userRegisterRequest = UserRegisterRequest.builder()
         .email("deleteUserHard_success@email.com")
         .nickname("nickname")
-        .password("password")
+        .password("password123@@@")
         .build();
 
     UserDto createdUser = userService.createUser(userRegisterRequest);
