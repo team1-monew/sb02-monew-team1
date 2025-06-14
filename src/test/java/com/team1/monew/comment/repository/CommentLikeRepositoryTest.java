@@ -1,5 +1,6 @@
 package com.team1.monew.comment.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -9,12 +10,14 @@ import com.team1.monew.comment.entity.CommentLike;
 import com.team1.monew.config.QueryDslConfig;
 import com.team1.monew.user.entity.User;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
@@ -187,4 +190,84 @@ public class CommentLikeRepositoryTest {
         assertTrue(result.isEmpty());
     }
 
+    @Test
+    void findTop10WithCommentByLikedById_최신순10개조회() {
+        // given
+        User user = new User("top10@example.com", "Top10", "pw");
+        entityManager.persist(user);
+
+        Article article = Article.builder()
+            .source("source")
+            .sourceUrl("url")
+            .title("제목")
+            .publishDate(LocalDateTime.now())
+            .summary("요약")
+            .createdAt(LocalDateTime.now())
+            .build();
+        entityManager.persist(article);
+
+        // 15개 좋아요 등록
+        for (int i = 0; i < 15; i++) {
+            Comment comment = new Comment(article, user, "댓글 " + i);
+            entityManager.persist(comment);
+
+            CommentLike like = new CommentLike(comment, user);
+            entityManager.persist(like);
+        }
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        List<CommentLike> result = commentLikeRepository.findTop10WithCommentByLikedById(user.getId(), Pageable.ofSize(10));
+
+        // then
+        assertEquals(10, result.size());
+
+        // 최신순 정렬 검증
+        for (int i = 0; i < result.size() - 1; i++) {
+            LocalDateTime cur = result.get(i).getCreatedAt();
+            LocalDateTime next = result.get(i + 1).getCreatedAt();
+            assertTrue(cur.isAfter(next) || cur.isEqual(next));
+        }
+
+        // 연관된 댓글과 기사가 페치조인 되었는지 검증
+        assertTrue(result.stream().allMatch(cl -> cl.getComment() != null && cl.getComment().getArticle() != null));
+    }
+
+    @Test
+    void findWithCommentByLikedById_모든좋아요조회() {
+        // given
+        User user = new User("alllikes@example.com", "AllLikes", "pw");
+        entityManager.persist(user);
+
+        Article article = Article.builder()
+            .source("source")
+            .sourceUrl("url")
+            .title("제목")
+            .publishDate(LocalDateTime.now())
+            .summary("요약")
+            .createdAt(LocalDateTime.now())
+            .build();
+        entityManager.persist(article);
+
+        // 3개 좋아요 등록
+        for (int i = 0; i < 3; i++) {
+            Comment comment = new Comment(article, user, "댓글 " + i);
+            entityManager.persist(comment);
+
+            CommentLike like = new CommentLike(comment, user);
+            entityManager.persist(like);
+        }
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        List<CommentLike> result = commentLikeRepository.findWithCommentByLikedById(user.getId());
+
+        // then
+        assertEquals(3, result.size());
+        assertTrue(result.stream().allMatch(cl -> cl.getComment() != null && cl.getComment().getArticle() != null));
+    }
 }
