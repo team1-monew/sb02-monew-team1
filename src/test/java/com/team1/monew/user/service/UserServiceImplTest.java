@@ -17,6 +17,10 @@ import com.team1.monew.user.dto.UserUpdateRequest;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.mapper.UserMapper;
 import com.team1.monew.user.repository.UserRepository;
+import com.team1.monew.useractivity.document.ArticleViewActivity;
+import com.team1.monew.useractivity.document.CommentActivity;
+import com.team1.monew.useractivity.document.CommentLikeActivity;
+import com.team1.monew.useractivity.document.SubscriptionActivity;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,7 +44,6 @@ class UserServiceImplTest {
   @Mock
   SubscriptionRepository subscriptionRepository;
 
-
   @Mock
   CommentLikeCountService commentLikeCountService;
 
@@ -48,6 +52,9 @@ class UserServiceImplTest {
 
   @Mock
   User deletedUser;
+
+  @Mock
+  MongoTemplate mongoTemplate;
 
   @InjectMocks
   UserServiceImpl userService;
@@ -106,6 +113,10 @@ class UserServiceImplTest {
     given(userRepository.existsByEmail(userRegisterRequest.email())).willReturn(false);
     given(userRepository.save(any(User.class))).willReturn(user);
     given(userMapper.toDto(any(User.class))).willReturn(userDto);
+    given(mongoTemplate.insert(any(SubscriptionActivity.class))).willReturn(null);
+    given(mongoTemplate.insert(any(ArticleViewActivity.class))).willReturn(null);
+    given(mongoTemplate.insert(any(CommentActivity.class))).willReturn(null);
+    given(mongoTemplate.insert(any(CommentLikeActivity.class))).willReturn(null);
 
     // when
     UserDto result = userService.createUser(userRegisterRequest);
