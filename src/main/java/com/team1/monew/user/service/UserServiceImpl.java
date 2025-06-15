@@ -12,6 +12,7 @@ import com.team1.monew.user.dto.UserRegisterRequest;
 import com.team1.monew.user.dto.UserUpdateRequest;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.event.UserCreateEvent;
+import com.team1.monew.user.event.UserDeleteEvent;
 import com.team1.monew.user.mapper.UserMapper;
 import com.team1.monew.user.repository.UserRepository;
 import java.util.List;
@@ -125,6 +126,8 @@ public class UserServiceImpl implements UserService {
     commentLikeCountService.updateLikeCountByDeletedUser(id);
     userRepository.deleteById(id);
     log.info("사용자 물리 삭제 완료: id={}", id);
+
+    eventPublisher.publishEvent(new UserDeleteEvent(id));
   }
 
   private void validateEmailNotDuplicated(String email) {
