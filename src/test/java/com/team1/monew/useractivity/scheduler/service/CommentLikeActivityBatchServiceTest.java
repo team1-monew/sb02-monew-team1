@@ -21,23 +21,37 @@ import org.bson.Document;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.retry.support.RetryTemplate;
 
 @ExtendWith(MockitoExtension.class)
 class CommentLikeActivityBatchServiceTest {
 
+    @Mock
+    UserRepository userRepository;
+
+    @Mock
+    CommentLikeRepository commentLikeRepository;
+
+    @Mock
+    MongoTemplate mongoTemplate;
+
+    @Spy
+    RetryTemplate retryTemplate;
+
+    @Mock
+    MongoCollection<Document> collection;
+
+    @InjectMocks
+    CommentLikeActivityBatchService commentLikeActivityBatchService;
+
     @Test
     void 좋아요한댓글_bulkWrite가_정상_호출() {
         // given
-        UserRepository userRepository = mock(UserRepository.class);
-        CommentLikeRepository commentLikeRepository = mock(CommentLikeRepository.class);
-        MongoTemplate mongoTemplate = mock(MongoTemplate.class);
-        MongoCollection<Document> collection = mock(MongoCollection.class);
-
-        CommentLikeActivityBatchService service =
-            new CommentLikeActivityBatchService(userRepository, commentLikeRepository, mongoTemplate);
-
         User user = User.builder().email("like@test.com").nickname("좋아요").password("pw").build();
         Article article = mock(Article.class);
         when(article.getId()).thenReturn(1L);
@@ -56,7 +70,7 @@ class CommentLikeActivityBatchServiceTest {
         when(mongoTemplate.getCollection("comment_like_activities")).thenReturn(collection);
 
         // when
-        service.syncAll();
+        commentLikeActivityBatchService.syncAll();
 
         // then
         ArgumentCaptor<List<WriteModel<Document>>> captor = ArgumentCaptor.forClass(List.class);
