@@ -70,7 +70,6 @@ public class InterestRepositoryCustomImpl implements InterestRepositoryCustom {
     // 검색 필터 조건 + 커서조건 + 정렬 조건을 모두 합친 조건을 만족하는 데이터를 뽑아내는 쿼리
     List<Interest> results = queryFactory
         .selectFrom(interest)
-        .leftJoin(interest.keywords).fetchJoin()
         .where(where)
         .orderBy(orderSpecifiers)
         .limit(condition.limit() + 1)
