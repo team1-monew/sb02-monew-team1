@@ -41,6 +41,7 @@ public enum ErrorCode implements Code{
   CONFLICT(HttpStatus.CONFLICT, "이미 존재하는 리소스입니다."),
   DATA_INTEGRITY_VIOLATION(HttpStatus.CONFLICT, "데이터 무결성 제약 조건에 위배됩니다."),
   SIMILARITY_OVER_VIOLATION(HttpStatus.CONFLICT, "80% 이상의 유사한 이름이 이미 존재합니다."),
+  MAX_RETRY_EXCEEDED(HttpStatus.CONFLICT, "최대 재시도 횟수를 초과하여, 요청이 중단되었습니다." ),
 
   // --- 415 Unsupported Media Type ---
   MEDIA_TYPE_NOT_SUPPORTED(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "지원하지 않는 콘텐츠 타입입니다."),
