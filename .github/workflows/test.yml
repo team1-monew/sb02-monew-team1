@@ -1,0 +1,63 @@
+name: CI with Gradle and CodeCov
+
+# 수동 또는 main 브랜치에 pull_request가 올라왔을 때 트리거
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - develop
+jobs:
+  test-and-coverage:
+    name: test
+    runs-on: ubuntu-latest
+
+    env:
+      SPRING_PROFILES_ACTIVE: ${{ secrets.ACTIVE_PROFILE }}
+      AWS_S3_ACCESS_KEY: ${{ secrets.AWS_S3_ACCESS_KEY }}
+      AWS_S3_SECRET_KEY: ${{ secrets.AWS_S3_SECRET_KEY }}
+      AWS_S3_REGION: ${{ secrets.AWS_S3_REGION }}
+      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+      NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+      NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+      NAVER_API_URL: ${{ secrets.NAVER_API_URL }}
+      NAVER_SOURCE_NAME: ${{ secrets.NAVER_SOURCE_NAME }}
+      CHOSUN_URL: ${{ secrets.CHOSUN_URL }}
+      CHOSUN_SOURCE_NAME: ${{ secrets.CHOSUN_SOURCE_NAME }}
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      MONGO_DATABASE: ${{ secrets.MONGO_DATABASE }}
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_USERNAME: ${{ secrets.POSTGRES_USERNAME }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+
+    steps:
+      # 현재 워크플로우가 실행되는 가상 머신(러너)에 해당 저장소의 소스 코드를 다운로드
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      # 테스트가 이뤄질 JDK 환경 설정
+      - name: set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      # Gradle 의존성을 github Actions에 캐싱 -> 재배포 시에 의존성을 다시 다운로드 받지 않아도 됨
+      - name: cache gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # 테스트 + 빌드 과정 두가지 테스트
+      - name: build with gradle
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean build
+        env:
+          JAVA_TOOL_OPTIONS: "-Xmx2g -Xms512m"
