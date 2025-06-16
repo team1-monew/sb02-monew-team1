@@ -10,7 +10,7 @@ public class SecurityPathUtil {
   private static final Set<String> excludePatterns = Set.of(
       "/", "/index.html", "/favicon.ico", "/error",
       "/static/**", "/css/**", "/js/**", "/images/**", "/assets/**",
-      "/api/users", "/api/users/login", "/api/health"
+      "/api/users", "/api/users/login", "/api/health", "/actuator/**"
   );
 
   public static boolean shouldExclude(String path) {
