@@ -3,6 +3,7 @@ package com.team1.monew.comment;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -161,6 +162,56 @@ class CommentIntegrationTest {
             assertThat(activity).isNotNull();
             assertThat(activity.getComments())
                 .noneMatch(c -> c.id().equals(commentId));
+        });
+    }
+
+    @Test
+    void 댓글을_수정하면_MongoDB_활동기록의_댓글_내용도_수정된다() throws Exception {
+        // given
+        CommentRegisterRequest request = new CommentRegisterRequest(articleId, userId, "초기 댓글 내용");
+
+        String response = mockMvc.perform(post("/api/comments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Monew-Request-User-ID", userId)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isCreated())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        Long commentId = objectMapper.readTree(response).get("id").asLong();
+
+        // then: MongoDB에 초기 내용이 저장되었는지 확인
+        await().atMost(3, TimeUnit.SECONDS).untilAsserted(() -> {
+            CommentActivity activity = mongoTemplate.findById(userId, CommentActivity.class);
+            assertThat(activity).isNotNull();
+            assertThat(activity.getComments()).hasSize(1);
+            assertThat(activity.getComments().get(0).id()).isEqualTo(commentId);
+            assertThat(activity.getComments().get(0).content()).isEqualTo("초기 댓글 내용");
+        });
+
+        // when: 댓글 내용 수정
+        String patchRequestBody = """
+        {
+            "content": "수정된 댓글 내용"
+        }
+        """;
+
+        mockMvc.perform(
+                patch("/api/comments/{commentId}", commentId)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Monew-Request-User-ID", userId)
+                    .content(patchRequestBody)
+            )
+            .andExpect(status().isOk());
+
+        // then: MongoDB에서도 수정된 내용이 반영되었는지 확인
+        await().atMost(3, TimeUnit.SECONDS).untilAsserted(() -> {
+            CommentActivity activity = mongoTemplate.findById(userId, CommentActivity.class);
+            assertThat(activity).isNotNull();
+            assertThat(activity.getComments()).hasSize(1);
+            assertThat(activity.getComments().get(0).id()).isEqualTo(commentId);
+            assertThat(activity.getComments().get(0).content()).isEqualTo("수정된 댓글 내용");
         });
     }
 

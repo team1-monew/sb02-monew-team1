@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import ch.qos.logback.core.joran.spi.EventPlayer;
 import com.team1.monew.comment.service.CommentLikeCountService;
 import com.team1.monew.exception.RestException;
 import com.team1.monew.interest.repository.InterestRepository;
@@ -15,6 +16,7 @@ import com.team1.monew.user.dto.UserLoginRequest;
 import com.team1.monew.user.dto.UserRegisterRequest;
 import com.team1.monew.user.dto.UserUpdateRequest;
 import com.team1.monew.user.entity.User;
+import com.team1.monew.user.event.UserCreateEvent;
 import com.team1.monew.user.mapper.UserMapper;
 import com.team1.monew.user.repository.UserRepository;
 import com.team1.monew.useractivity.document.ArticleViewActivity;
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -55,6 +58,9 @@ class UserServiceImplTest {
 
   @Mock
   MongoTemplate mongoTemplate;
+
+  @Mock
+  ApplicationEventPublisher eventPublisher;
 
   @InjectMocks
   UserServiceImpl userService;
@@ -113,10 +119,6 @@ class UserServiceImplTest {
     given(userRepository.existsByEmail(userRegisterRequest.email())).willReturn(false);
     given(userRepository.save(any(User.class))).willReturn(user);
     given(userMapper.toDto(any(User.class))).willReturn(userDto);
-    given(mongoTemplate.insert(any(SubscriptionActivity.class))).willReturn(null);
-    given(mongoTemplate.insert(any(ArticleViewActivity.class))).willReturn(null);
-    given(mongoTemplate.insert(any(CommentActivity.class))).willReturn(null);
-    given(mongoTemplate.insert(any(CommentLikeActivity.class))).willReturn(null);
 
     // when
     UserDto result = userService.createUser(userRegisterRequest);
@@ -125,6 +127,7 @@ class UserServiceImplTest {
     assertThat(result).isEqualTo(userDto);
     verify(userRepository).save(any(User.class));
     verify(userMapper).toDto(any(User.class));
+    verify(eventPublisher).publishEvent(any(UserCreateEvent.class));
   }
 
   @Test
