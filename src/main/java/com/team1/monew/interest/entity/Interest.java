@@ -14,6 +14,7 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Table(name = "interests")
@@ -34,8 +35,8 @@ public class Interest {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // Interest가 save되면, 거기에 맞춰서 keyword가 save / remove됨 (Cascade, orphanRemoval)
     @OneToMany(mappedBy = "interest", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 1000)
     private List<Keyword> keywords = new ArrayList<>();
 
     // 양방향 연관관계 편의 메서드
