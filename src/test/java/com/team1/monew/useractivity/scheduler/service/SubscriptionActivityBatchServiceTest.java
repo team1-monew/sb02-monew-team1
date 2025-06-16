@@ -1,11 +1,12 @@
 package com.team1.monew.useractivity.scheduler.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.mock;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 
 import com.mongodb.MongoBulkWriteException;
@@ -13,6 +14,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.BulkWriteOptions;
 import com.mongodb.client.model.ReplaceOneModel;
 import com.mongodb.client.model.WriteModel;
+import com.team1.monew.exception.ErrorCode;
+import com.team1.monew.exception.RestException;
 import com.team1.monew.interest.entity.Interest;
 import com.team1.monew.subscription.entity.Subscription;
 import com.team1.monew.subscription.mapper.SubscriptionMapper;
@@ -21,6 +24,7 @@ import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import org.bson.Document;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +50,9 @@ public class SubscriptionActivityBatchServiceTest {
 
     @Mock
     SubscriptionRepository subscriptionRepository;
+
+    @Spy
+    RetryTemplate retryTemplate;
 
     @Spy
     SubscriptionMapper subscriptionMapper;
@@ -128,7 +136,7 @@ public class SubscriptionActivityBatchServiceTest {
         given(mockCollection.bulkWrite(any(), any(BulkWriteOptions.class))).willThrow(mockException);
 
         // when + then
-        assertDoesNotThrow(() -> subscriptionActivityBatchService.syncAll());
-        then(mockException).should().getWriteErrors();
+        RestException exception = assertThrows(RestException.class, () -> subscriptionActivityBatchService.syncAll());
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MAX_RETRY_EXCEEDED);
     }
 }

@@ -1,5 +1,6 @@
 package com.team1.monew.useractivity.scheduler.service;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.mock;
@@ -17,6 +18,8 @@ import com.mongodb.client.model.WriteModel;
 import com.team1.monew.article.entity.Article;
 import com.team1.monew.article.entity.ArticleView;
 import com.team1.monew.article.repository.ArticleViewRepository;
+import com.team1.monew.exception.ErrorCode;
+import com.team1.monew.exception.RestException;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -29,8 +32,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +49,9 @@ class ArticleViewActivityBatchServiceTest {
 
     @Mock
     ArticleViewRepository articleViewRepository;
+
+    @Spy
+    RetryTemplate retryTemplate;
 
     @InjectMocks
     ArticleViewActivityBatchService articleViewActivityBatchService;
@@ -111,10 +119,9 @@ class ArticleViewActivityBatchServiceTest {
 
         MongoBulkWriteException mockException = mock(MongoBulkWriteException.class);
         given(mockCollection.bulkWrite(any(), any(BulkWriteOptions.class))).willThrow(mockException);
-        given(mockException.getWriteErrors()).willReturn(List.of()); // catch 블록 실행 검증용
 
         // when + then
-        assertDoesNotThrow(() -> articleViewActivityBatchService.syncAll());
-        then(mockException).should().getWriteErrors();
+        RestException exception = assertThrows(RestException.class, () -> articleViewActivityBatchService.syncAll());
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MAX_RETRY_EXCEEDED);
     }
 }
