@@ -10,6 +10,7 @@ import com.team1.monew.comment.dto.CommentUpdateRequest;
 import com.team1.monew.comment.entity.Comment;
 import com.team1.monew.comment.event.CommentActivityCreatedEvent;
 import com.team1.monew.comment.event.CommentActivityDeletedEvent;
+import com.team1.monew.comment.event.CommentActivityEditedEvent;
 import com.team1.monew.comment.mapper.CommentMapper;
 import com.team1.monew.comment.mapper.CommentPageResponseMapper;
 import com.team1.monew.comment.repository.CommentLikeRepository;
@@ -140,6 +141,9 @@ public class CommentServiceImpl implements CommentService {
         boolean likedByMe = commentLikeRepository.existsByComment_IdAndLikedBy_Id(commentId, userId);
 
         CommentDto dto = commentMapper.toDto(comment, likedByMe);
+
+        eventPublisher.publishEvent(new CommentActivityEditedEvent(userId, commentId, request.content()));
+
         log.debug("댓글 DTO 반환 - {}", dto);
 
         return dto;
