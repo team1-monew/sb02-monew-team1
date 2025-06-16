@@ -2,11 +2,11 @@ package com.team1.monew.article.integration;
 
 import com.team1.monew.article.entity.Article;
 import com.team1.monew.article.repository.ArticleRepository;
+import com.team1.monew.article.repository.ArticleViewRepository;
 import com.team1.monew.common.support.IntegrationTestSupport;
 import com.team1.monew.user.entity.User;
 import com.team1.monew.user.repository.UserRepository;
 import com.team1.monew.useractivity.document.ArticleViewActivity;
-import com.team1.monew.useractivity.document.SubscriptionActivity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -18,9 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.MongoDBContainer;
@@ -52,6 +54,9 @@ public class ArticleViewIntegrationTest extends IntegrationTestSupport{
 
   @Autowired
   private ArticleRepository articleRepository;
+
+  @Autowired
+  private ArticleViewRepository articleViewRepository;
 
   @Autowired
   private UserRepository userRepository;
@@ -91,11 +96,16 @@ public class ArticleViewIntegrationTest extends IntegrationTestSupport{
   }
 
   @AfterEach
-  void cleanUpMongoCollection() {
-    mongoTemplate.dropCollection(SubscriptionActivity.class);
+  void cleanUp() {
+    articleViewRepository.deleteAll();
+    articleRepository.deleteAll();
+    userRepository.deleteAll();
+
+    mongoTemplate.dropCollection(ArticleViewActivity.class);
   }
 
   @Test
+  @Commit
   @DisplayName("기사 조회 API 요청 성공 - 비동기 이벤트 발행으로 MongoDB에 document 업데이트")
   void recordView_shouldStoreDocumentInMongo() throws Exception {
     // given
@@ -104,6 +114,10 @@ public class ArticleViewIntegrationTest extends IntegrationTestSupport{
     mockMvc.perform(post("/api/articles/{articleId}/article-views", article.getId())
             .header("Monew-Request-User-ID", user.getId()))
         .andExpect(status().isOk());
+
+    TestTransaction.flagForCommit();
+    TestTransaction.end();
+    TestTransaction.start();
 
     // then
     await().atMost(3, TimeUnit.SECONDS).untilAsserted(() -> {

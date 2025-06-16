@@ -22,9 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.MongoDBContainer;
@@ -92,7 +94,11 @@ public class SubscriptionIntegrationTest extends IntegrationTestSupport {
   }
 
   @AfterEach
-  void cleanUpMongoCollection() {
+  void cleanUp() {
+    subscriptionRepository.deleteAll();
+    interestRepository.deleteAll();
+    userRepository.deleteAll();
+
     mongoTemplate.dropCollection(SubscriptionActivity.class);
   }
 
@@ -114,6 +120,7 @@ public class SubscriptionIntegrationTest extends IntegrationTestSupport {
   }
 
   @Test
+  @Commit
   @DisplayName("관심사 구독 API 요청 성공 - 비동기 이벤트 발행으로 MongoDB에 document 업데이트")
   void createSubscription_eventPublish_async_mongoDB_save_document() throws Exception {
     // given
@@ -122,6 +129,10 @@ public class SubscriptionIntegrationTest extends IntegrationTestSupport {
     mockMvc.perform(post("/api/interests/{interestId}/subscriptions", savedInterest.getId())
             .header("Monew-Request-User-ID", userId))
         .andExpect(status().isCreated());
+
+    TestTransaction.flagForCommit();
+    TestTransaction.end();
+    TestTransaction.start();
 
     // then
     await().atMost(3, TimeUnit.SECONDS).untilAsserted(() -> {
@@ -160,6 +171,7 @@ public class SubscriptionIntegrationTest extends IntegrationTestSupport {
   }
 
   @Test
+  @Commit
   @DisplayName("관심사 구독 취소 API 요청 성공 - 비동기 이벤트 발행으로 MongoDB에 document 업데이트")
   void deleteSubscription_eventPublish_async_mongoDB_save_document() throws Exception {
     // given
@@ -179,6 +191,10 @@ public class SubscriptionIntegrationTest extends IntegrationTestSupport {
     mockMvc.perform(delete("/api/interests/{interestId}/subscriptions", savedInterest.getId())
             .header("Monew-Request-User-ID", userId))
         .andExpect(status().isNoContent());
+
+    TestTransaction.flagForCommit();
+    TestTransaction.end();
+    TestTransaction.start();
 
     // then
     await().atMost(3, TimeUnit.SECONDS).untilAsserted(() -> {
