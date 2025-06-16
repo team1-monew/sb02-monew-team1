@@ -7,3 +7,17 @@ logging:
   level:
     org.springframework.web: INFO
     com.team1.monew.*: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+  endpoint:
+    health:
+      show-details: never
+  info:
+    env:
+      enabled: false
