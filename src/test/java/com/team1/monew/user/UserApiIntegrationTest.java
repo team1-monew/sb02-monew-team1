@@ -21,14 +21,27 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
+@Testcontainers
 @Transactional
 class UserApiIntegrationTest {
+  @Container
+  static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:6.0");
+
+  @DynamicPropertySource
+  static void setMongoUri(DynamicPropertyRegistry registry) {
+    registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+  }
 
   @Autowired
   private MockMvc mockMvc;
