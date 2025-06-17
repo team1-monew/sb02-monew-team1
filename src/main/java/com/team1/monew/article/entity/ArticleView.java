@@ -27,7 +27,7 @@ public class ArticleView {
     private Article article;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "viewed_by", nullable = false)
+    @JoinColumn(name = "viewed_by", nullable = true)
     private User viewedBy;
 
     @CreatedDate
