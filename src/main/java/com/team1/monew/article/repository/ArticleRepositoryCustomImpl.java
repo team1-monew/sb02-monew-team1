@@ -52,6 +52,8 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
     ) {
         BooleanBuilder where = new BooleanBuilder();
 
+        where.and(article.isDeleted.eq(false));
+
         if (keyword != null && !keyword.isBlank()) {
             where.and(
                     article.title.containsIgnoreCase(keyword)
