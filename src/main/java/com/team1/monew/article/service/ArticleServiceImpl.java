@@ -67,12 +67,12 @@ public class ArticleServiceImpl implements ArticleService {
 
     log.info("📝 네이버 기사 수집 완료: 수집된 기사 수 = {}", collectedArticles.size());
 
-    saveArticles(collectedArticles, interest);
+    List<CollectedArticleDto> savedArticles = saveArticles(collectedArticles, interest);
 
     log.info("📝 네이버 기사 저장 완료: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
 
-    if (!collectedArticles.isEmpty()) {
-      eventPublisher.publishEvent(new NewArticlesCollectedEvent(interest, collectedArticles));
+    if (!savedArticles.isEmpty()) {
+      eventPublisher.publishEvent(new NewArticlesCollectedEvent(interest, savedArticles));
     }
   }
 
@@ -91,17 +91,19 @@ public class ArticleServiceImpl implements ArticleService {
 
     log.info("📝 조선일보 기사 필터링 완료: 필터된 기사 수 = {}", filtered.size());
 
-    saveArticles(filtered, interest);
+    List<CollectedArticleDto> savedArticles = saveArticles(filtered, interest);
 
     log.info("📝 조선일보 기사 저장 완료: 관심사 = {}, 키워드 = {}", interest.getName(), keyword.getKeyword());
 
-    if (!filtered.isEmpty()) {
-      eventPublisher.publishEvent(new NewArticlesCollectedEvent(interest, filtered));
+    if (!savedArticles.isEmpty()) {
+      eventPublisher.publishEvent(new NewArticlesCollectedEvent(interest, savedArticles));
     }
   }
 
-  private void saveArticles(List<CollectedArticleDto> collectedArticles, Interest interest) {
+  private List<CollectedArticleDto> saveArticles(List<CollectedArticleDto> collectedArticles, Interest interest) {
     log.info("📝 기사 저장 시작: 총 기사 수 = {}", collectedArticles.size());
+
+    List<CollectedArticleDto> result = new ArrayList<>();
 
     for (CollectedArticleDto dto : collectedArticles) {
       if (articleRepository.existsBySourceUrl(dto.sourceUrl())) {
@@ -126,10 +128,14 @@ public class ArticleServiceImpl implements ArticleService {
 
       articleRepository.save(article);
 
+      result.add(dto);
+
       log.info("📝 기사 저장 완료: {}", dto.title());
     }
 
     log.info("📝 기사 저장 완료: 총 저장된 기사 수 = {}", collectedArticles.size());
+
+    return result;
   }
 
   @Override
