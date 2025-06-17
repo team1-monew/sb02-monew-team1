@@ -1,6 +1,7 @@
 package com.team1.monew.notification.controller;
 
 import com.team1.monew.common.dto.CursorPageResponse;
+import com.team1.monew.notification.controller.api.NotificationApi;
 import com.team1.monew.notification.dto.NotificationCursorRequest;
 import com.team1.monew.notification.dto.NotificationDto;
 import com.team1.monew.notification.service.NotificationService;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
-public class NotificationController {
+public class NotificationController implements NotificationApi {
   private final NotificationService notificationService;
 
   @GetMapping

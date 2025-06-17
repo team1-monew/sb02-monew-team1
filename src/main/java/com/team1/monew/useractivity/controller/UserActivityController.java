@@ -1,6 +1,7 @@
 package com.team1.monew.useractivity.controller;
 
 
+import com.team1.monew.useractivity.controller.api.UserActivityApi;
 import com.team1.monew.useractivity.dto.UserActivityDto;
 import com.team1.monew.useractivity.service.UserActivityService;
 import lombok.AllArgsConstructor;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/user-activities")
 @AllArgsConstructor
-public class UserActivityController {
+public class UserActivityController implements UserActivityApi {
 
   private UserActivityService userActivityService;
 

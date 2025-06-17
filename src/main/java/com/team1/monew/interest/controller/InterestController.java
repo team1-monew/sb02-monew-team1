@@ -1,6 +1,7 @@
 package com.team1.monew.interest.controller;
 
 import com.team1.monew.common.dto.CursorPageResponse;
+import com.team1.monew.interest.controller.api.InterestApi;
 import com.team1.monew.interest.dto.InterestDto;
 import com.team1.monew.interest.dto.InterestRegisterRequest;
 import com.team1.monew.interest.dto.InterestSearchCondition;
@@ -29,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/api/interests")
-public class InterestController {
+public class InterestController implements InterestApi {
 
   private final InterestService interestService;
   private final InterestPageResponseMapper pageResponseMapper;
@@ -43,6 +44,7 @@ public class InterestController {
     return ResponseEntity.status(HttpStatus.CREATED).body(interestDto);
   }
 
+
   @GetMapping
   public ResponseEntity<CursorPageResponse<InterestDto>> getInterests(
       @RequestParam(name = "direction", defaultValue = "DESC") String direction,
@@ -50,8 +52,6 @@ public class InterestController {
       @RequestParam(name = "orderBy", defaultValue = "subscriberCount") String orderBy,
       @RequestParam(name = "keyword", required = false) String keyword,
       @RequestParam(name = "cursor", required = false) String cursor,
-      // 프론트단에서는 after를 백엔드에서 받은 nextAfter값을 가지고 있다가 넘겨줌.
-      // 즉, 백엔드에서 nextAfter를 LocalDateTime 타입으로 넘겨준다면, after도 LocalDateTime으로 넘겨줄 것
       @RequestParam(name = "after", required = false) LocalDateTime after,
       @RequestHeader("Monew-Request-User-ID") Long userId) {
     InterestSearchCondition interestSearchCondition = InterestSearchCondition.builder()

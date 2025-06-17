@@ -1,5 +1,6 @@
 package com.team1.monew.user.controller;
 
+import com.team1.monew.user.controller.api.UserApi;
 import com.team1.monew.user.dto.UserDto;
 import com.team1.monew.user.dto.UserLoginRequest;
 import com.team1.monew.user.dto.UserRegisterRequest;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-public class UserController {
+public class UserController implements UserApi {
   private final UserService userService;
 
   @PostMapping
