@@ -1,8 +1,10 @@
 name: CI with Gradle and CodeCov
 
-# 수동 또는 main 브랜치에 pull_request가 올라왔을 때 트리거
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - develop
   pull_request:
     branches:
       - develop
