@@ -5,6 +5,8 @@ import com.team1.monew.notification.dto.NotificationCursorRequest;
 import com.team1.monew.notification.dto.NotificationDto;
 import com.team1.monew.notification.service.NotificationService;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +29,7 @@ public class NotificationController {
   public ResponseEntity<CursorPageResponse<NotificationDto>> getNotifications(
       @RequestParam(required = false, defaultValue = "ASC") String direction,
       @RequestParam(required = false) String cursor,
-      @RequestParam(required = false) LocalDateTime after,
+      @RequestParam(required = false) String after,
       @RequestParam(defaultValue = "20") int limit,
       @RequestHeader(value = "Monew-Request-User-ID") Long userId
   ) {
@@ -36,8 +38,8 @@ public class NotificationController {
 
     NotificationCursorRequest request = NotificationCursorRequest.builder()
         .direction(direction)
-        .cursor(cursor)
-        .after(after)
+        .cursor(parseToLocalDateTime(cursor) != null ? parseToLocalDateTime(cursor).toString() : null)
+        .after(parseToLocalDateTime(after))
         .limit(limit)
         .userId(userId)
         .build();
@@ -68,5 +70,21 @@ public class NotificationController {
     notificationService.confirm(notificationId);
 
     return ResponseEntity.ok().build();
+  }
+
+  private LocalDateTime parseToLocalDateTime(String datetimeString) {
+    if (datetimeString == null || datetimeString.isBlank()) return null;
+
+    try {
+      // 우선 OffsetDateTime으로 시도 (시간대 정보 포함)
+      return OffsetDateTime.parse(datetimeString).toLocalDateTime();
+    } catch (DateTimeParseException e1) {
+      try {
+        // 시간대 정보가 없는 경우 (LocalDateTime)
+        return LocalDateTime.parse(datetimeString);
+      } catch (DateTimeParseException e2) {
+        return null;
+      }
+    }
   }
 }
