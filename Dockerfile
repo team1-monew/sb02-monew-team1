@@ -6,7 +6,7 @@ COPY gradlew .
 COPY build.gradle .
 COPY settings.gradle .
 
-RUN chmod +x gradlew
+RUN sed -i 's/\r//' gradlew && chmod +x gradlew
 RUN ./gradlew dependencies
 
 COPY src src
@@ -23,6 +23,4 @@ ENV JVM_OPTS=""
 WORKDIR /app
 
 COPY --from=build /app/build/libs/${PROJECT_NAME}-${PROJECT_VERSION}.jar app.jar
-ENTRYPOINT ["sh", "-c", "java $JVM_OPTS -jar /app/app.jar --server.port=80"]
-
-# CMD java $JVM_OPTS -jar build/libs/${PROJECT_NAME}-${PROJECT_VERSION}.jar
+ENTRYPOINT ["java", "-jar", "/app/app.jar", "--server.port=80"]

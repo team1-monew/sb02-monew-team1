@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE}
+    active: ${ACTIVE_PROFILE:prod}
   application:
 
     name: monew
