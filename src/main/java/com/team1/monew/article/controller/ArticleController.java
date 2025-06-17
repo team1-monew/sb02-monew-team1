@@ -57,10 +57,8 @@ public class ArticleController {
     log.info("📝 기사 목록 조회 요청 시작: keyword={}, interestId={}, sourceIn={}, publishDateFrom={}, publishDateTo={}, orderBy={}, direction={}, cursor={}, limit={}, after={}, userId={}",
             keyword, interestId, sourceIn, publishDateFrom, publishDateTo, orderBy, direction, cursor, limit, after, userId);
 
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-    LocalDateTime fromDate = parseStartDate(publishDateFrom, formatter);
-    LocalDateTime toDate = parseEndDate(publishDateTo, formatter);
+    LocalDateTime fromDate = parseStartDate(publishDateFrom);
+    LocalDateTime toDate = parseEndDate(publishDateTo);
 
     CursorPageResponse<ArticleDto> response = articleService.getArticles(
             keyword,
@@ -81,30 +79,42 @@ public class ArticleController {
     return ResponseEntity.ok(response);
   }
 
-  private LocalDateTime parseStartDate(String rawDate, DateTimeFormatter formatter) {
+  private LocalDateTime parseStartDate(String rawDate) {
     if (rawDate == null || rawDate.isBlank()) return null;
 
     try {
-      LocalDate date = LocalDate.parse(rawDate, formatter);
-      return date.atStartOfDay(); // 00:00:00
+      DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_DATE_TIME;
+      LocalDateTime date = LocalDateTime.parse(rawDate, isoFormatter);
+      return date.toLocalDate().atStartOfDay();
     } catch (DateTimeParseException e) {
-      log.warn("⚠️ 날짜 파싱 실패: 입력값 = '{}', 예외 메시지 = {}", rawDate, e.getMessage());
-      return null;
+      try {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate date = LocalDate.parse(rawDate, dateFormatter);
+        return date.atStartOfDay();
+      } catch (DateTimeParseException e2) {
+        log.warn("⚠️ 날짜 파싱 실패: 입력값 = '{}', 예외 메시지 = {}", rawDate, e2.getMessage());
+        return null;
+      }
     }
   }
-
-  private LocalDateTime parseEndDate(String rawDate, DateTimeFormatter formatter) {
+  private LocalDateTime parseEndDate(String rawDate) {
     if (rawDate == null || rawDate.isBlank()) return null;
 
     try {
-      LocalDate date = LocalDate.parse(rawDate, formatter);
-      return date.atTime(23, 59, 59); // 23:59:59
+      DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_DATE_TIME;
+      LocalDateTime date = LocalDateTime.parse(rawDate, isoFormatter);
+      return date.toLocalDate().atTime(23, 59, 59);
     } catch (DateTimeParseException e) {
-      log.warn("⚠️ 날짜 파싱 실패: 입력값 = '{}', 예외 메시지 = {}", rawDate, e.getMessage());
-      return null;
+      try {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate date = LocalDate.parse(rawDate, dateFormatter);
+        return date.atTime(23, 59, 59);
+      } catch (DateTimeParseException e2) {
+        log.warn("⚠️ 날짜 파싱 실패: 입력값 = '{}', 예외 메시지 = {}", rawDate, e2.getMessage());
+        return null;
+      }
     }
   }
-
 
   @GetMapping("/sources")
   public ResponseEntity<List<String>> getSources() {
@@ -124,10 +134,8 @@ public class ArticleController {
 
     log.info("🛠️ 기사 복구 요청 시작: from = {}, to = {}", from, to);
 
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-    LocalDateTime fromDate = parseStartDate(from, formatter);
-    LocalDateTime toDate = parseEndDate(to, formatter);
+    LocalDateTime fromDate = parseStartDate(from);
+    LocalDateTime toDate = parseEndDate(to);
 
     log.info("🛠️ 기사 복구 요청 완료: from = {}, to = {}", fromDate, toDate);
 
@@ -138,7 +146,7 @@ public class ArticleController {
 
   @DeleteMapping("/{articleId}")
   public ResponseEntity<Void> deleteArticle(
-      @PathVariable Long articleId) {
+          @PathVariable Long articleId) {
 
     log.info("📝 기사 삭제 요청: articleId = {}", articleId);
 
@@ -151,7 +159,7 @@ public class ArticleController {
 
   @DeleteMapping("/{articleId}/hard")
   public ResponseEntity<Void> hardDeleteArticle(
-      @PathVariable Long articleId) {
+          @PathVariable Long articleId) {
 
     log.info("📝 기사 물리 삭제 요청: articleId = {}", articleId);
 
