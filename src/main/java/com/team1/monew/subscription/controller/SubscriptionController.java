@@ -1,6 +1,7 @@
 package com.team1.monew.subscription.controller;
 
 
+import com.team1.monew.subscription.controller.api.SubscriptionApi;
 import com.team1.monew.subscription.dto.SubscriptionDto;
 import com.team1.monew.subscription.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-public class SubscriptionController {
+public class SubscriptionController implements SubscriptionApi {
 
   private final SubscriptionService subscriptionService;
 

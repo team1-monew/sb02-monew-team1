@@ -1,5 +1,6 @@
 package com.team1.monew.comment.controller;
 
+import com.team1.monew.comment.controller.api.CommentApi;
 import com.team1.monew.comment.dto.CommentDto;
 import com.team1.monew.comment.dto.CommentLikeDto;
 import com.team1.monew.comment.dto.CommentRegisterRequest;
@@ -28,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/comments")
 @AllArgsConstructor
 @Slf4j
-public class CommentController {
+public class CommentController implements CommentApi {
 
     private final CommentService commentService;
     private final CommentLikeService commentLikeService;
