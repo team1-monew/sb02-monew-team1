@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,7 +49,7 @@ public interface ArticleApi {
         @RequestParam(defaultValue = "publishDate") String orderBy,
         @RequestParam(defaultValue = "DESC") String direction,
         @RequestParam(required = false) String cursor,
-        @RequestParam(defaultValue = "20") int limit,
+        @RequestParam(defaultValue = "20") @Min(1) @Max(50) int limit,
         @RequestParam(required = false) String after,
         @RequestHeader(value = "Monew-Request-User-ID", required = false) Long userId);
 
