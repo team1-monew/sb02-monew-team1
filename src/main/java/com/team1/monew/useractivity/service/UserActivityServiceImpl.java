@@ -54,7 +54,7 @@ public class UserActivityServiceImpl implements UserActivityService{
             .map(CommentLikeActivity::getCommentLikes)
             .orElse(Collections.emptyList());
 
-        List<SubscriptionDto> subscriptions = subscriptionActivityRepository.findTop10SubscriptionsByUserId(userId)
+        List<SubscriptionDto> subscriptions = subscriptionActivityRepository.findById(userId)
             .map(SubscriptionActivity::getSubscriptions)
             .orElse(Collections.emptyList());
 
